@@ -29,7 +29,7 @@ log "env: $DEV_ENV"
 
 update_files() {
     log "copying over files from: $1"
-    pushd "$1" &> /dev/null
+    pushd "$1" &> /dev/null || exit
     (
         configs=$(find . -mindepth 1 -maxdepth 1 -type -type d)
         for c in $configs; do
@@ -37,16 +37,16 @@ update_files() {
             log "   removing: rm -rf $directory"
 
             if [[ $dry_run == "0" ]]; then
-                rm -rf $directory
+                rm -rf "$directory"
             fi
 
             log "   copying env: cp $c $2"
             if [[ $dry_run == "0" ]]; then
-                cp -r ./$c $2
+                cp -r "./$c" "$2"
             fi
         done
     )
-    popd &> /dev/null
+    popd &> /dev/null || exit
 }
 
 copy() {
@@ -59,3 +59,6 @@ copy() {
         cp "$1" "$2"
     fi
 }
+
+update_files "$DEV_ENV/env/.config" "$XDG_CONFIG_HOME"
+update_files "$DEV_ENV"/env/.local "$HOME"/.local

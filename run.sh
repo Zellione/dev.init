@@ -30,9 +30,9 @@ log() {
 log "RUN: env: $DEV_ENV -- grep: $grep"
 
 if [[ $DEV_ENV == "macos" ]]; then
-    scripts=`find $DEV_ENV/runs -mindepth 1 -maxdepth 1 -executable`
+    scripts=$(find "$DEV_ENV/runs" -mindepth 1 -maxdepth 1 -executable)
 else
-    scripts=`find $DEV_ENV/runs -mindepth 1 -maxdepth 1 -perm +111`
+    scripts=$(find "$DEV_ENV/runs" -mindepth 1 -maxdepth 1 -perm +111)
 fi
 
 for s in $scripts; do
