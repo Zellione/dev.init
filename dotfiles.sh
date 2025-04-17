@@ -31,7 +31,7 @@ update_files() {
     log "copying over files from: $1"
     pushd "$1" &> /dev/null || exit
     (
-        configs=$(find . -mindepth 1 -maxdepth 1 -type -type d)
+        configs=$(find . -mindepth 1 -maxdepth 1 -type d)
         for c in $configs; do
             directory=${2%/}/${c#./}
             log "   removing: rm -rf $directory"
@@ -40,7 +40,7 @@ update_files() {
                 rm -rf "$directory"
             fi
 
-            log "   copying env: cp $c $2"
+            log "   copying env: cp -r $c $2"
             if [[ $dry_run == "0" ]]; then
                 cp -r "./$c" "$2"
             fi
