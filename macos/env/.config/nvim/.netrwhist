@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =1
+" let g:netrw_dirhist_1='/home/sebastian/.config/nvim/lua/zellione'
+" let g:netrw_dirhist_0='/home/sebastian/.config/nvim/lua'
+" let g:netrw_dirhist_9='/home/sebastian/.config/nvim'
+" let g:netrw_dirhist_8='/home/sebastian/.config/nvim/lua'
+" let g:netrw_dirhist_7='/home/sebastian/.config/nvim'
+" let g:netrw_dirhist_6='/home/sebastian/.config/nvim/lua/zellione'
+" let g:netrw_dirhist_5='/home/sebastian/.config/nvim'
+" let g:netrw_dirhist_4='/home/sebastian/.config/nvim/lua'
+" let g:netrw_dirhist_3='/home/sebastian/.config/nvim/lua/zellione'
+" let g:netrw_dirhist_2='/home/sebastian/.config/nvim/lua'
