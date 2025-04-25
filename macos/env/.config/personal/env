@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
 
-export STOW_FOLDERS="bin,nvim,tmux-macos,tmux-sessionizer,zsh,ios,tree-sitter,alacritty,yabai,kitty,ghostty"
-
 addToPath() {
     if [[ "$PATH" != *"$1"* ]]; then
         export PATH=$PATH:$1
@@ -12,10 +10,4 @@ addToPathFront() {
     if [[ "$PATH" != *"$1"* ]]; then
         export PATH=$1:$PATH
     fi
-}
-
-change_background() {
-    WALLP=$(ls ~/Pictures/wallpapers | fzf)
-    dconf write /org/gnome/desktop/background/picture-uri-dark "'file:///$HOME/Pictures/wallpapers/$WALLP'"
-    dconf write /org/gnome/desktop/background/picture-uri "'file:///$HOME/Pictures/wallpapers/$WALLP'"
 }

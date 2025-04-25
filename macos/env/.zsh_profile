@@ -1,5 +1,5 @@
 export XDG_CONFIG_HOME=$HOME/.config
-VIM="nvim"
+VIM="/Users/sna06/neovim/nvim-macos-arm64/bin/nvim"
 PERSONAL=$XDG_CONFIG_HOME/personal
 
 bindkey -s ^f "tmux-sessionizer\n"

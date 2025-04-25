@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
 
-# addToPathFront /home/zellione/n/bin
-# addToPath /home/zellione/personal/lua-language-server/bin/Linux
 addToPath "$HOME"/.yarn/bin
 addToPath "$HOME"/.npm/bin
