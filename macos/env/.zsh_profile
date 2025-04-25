@@ -1,0 +1,22 @@
+export XDG_CONFIG_HOME=$HOME/.config
+VIM="nvim"
+PERSONAL=$XDG_CONFIG_HOME/personal
+
+bindkey -s ^f "tmux-sessionizer\n"
+
+source $PERSONAL/env
+for i in `find -L $PERSONAL`; do
+    source $i
+done
+
+if [ -d /Users/sna06/homebrew/Cellar/fzf/0.61.3/shell ]; then
+    source /Users/sna06/homebrew/Cellar/fzf/0.61.3/shell/key-bindings.zsh
+    source /Users/sna06/homebrew/Cellar/fzf/0.61.3/shell/completion.zsh
+fi
+
+addToPathFront $HOME/.local/scripts
+addToPathFront $HOME/.local/bin
+addToPathFront /opt/homebrew/bin/brew
+
+tmux=$(which tmux)
+alias tmux="$tmux -2"
