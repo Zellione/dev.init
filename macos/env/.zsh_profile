@@ -9,9 +9,10 @@ for i in `find -L $PERSONAL`; do
     source $i
 done
 
-if [ -d /Users/sna06/homebrew/Cellar/fzf/${ls -d */ | head -n 1}shell ]; then
-    source /Users/sna06/homebrew/Cellar/fzf/${ls -d */ | head -n 1}shell/key-bindings.zsh
-    source /Users/sna06/homebrew/Cellar/fzf/${ls -d */ | head -n 1}shell/completion.zsh
+fzf_dir=`ls -d /Users/sna06/homebrew/Cellar/fzf/* | head -n 1`/shell
+if [ -d $fzf_dir ]; then
+    source $fzf_dir/key-bindings.zsh
+    source $fzf_dir/completion.zsh
 fi
 
 addToPathFront $HOME/.local/scripts
