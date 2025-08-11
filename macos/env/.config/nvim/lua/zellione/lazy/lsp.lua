@@ -4,13 +4,11 @@ return {
 		"williamboman/mason.nvim",
 		"williamboman/mason-lspconfig.nvim",
 		"whoIsSethDaniel/mason-tool-installer.nvim",
-		"nvim-java/nvim-java",
+		-- "nvim-java/nvim-java",
 		{ "j-hui/fidget.nvim", opts = {} },
 		"rcarriga/nvim-notify",
 	},
 	config = function()
-		require("java").setup()
-
 		vim.api.nvim_create_autocmd("LspAttach", {
 			group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 			callback = function(event)
@@ -112,7 +110,7 @@ return {
 		local ensure_installed = vim.tbl_keys(servers or {})
 		vim.list_extend(ensure_installed, {
 			"codelldb",
-			"stylua",
+			"lua_ls",
 			"rust_analyzer",
 			"ts_ls",
 			"eslint",
@@ -125,15 +123,13 @@ return {
 		})
 		require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
-		require("mason-lspconfig").setup({
-			handlers = {
-				function(server_name)
-					local server = servers[server_name] or {}
-					server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-					require("lspconfig")[server_name].setup(server)
-				end,
-			},
-		})
+        for name,_ in pairs(servers) do
+            local server = servers[name] or {}
+            server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
+            require('lspconfig')[name].setup(server)
+        end
+
+		require("mason-lspconfig").setup({})
 
 		vim.diagnostic.config({
 			virtual_text = true,
