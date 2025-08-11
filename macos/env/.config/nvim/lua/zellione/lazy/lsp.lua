@@ -5,7 +5,7 @@ return {
 		"williamboman/mason-lspconfig.nvim",
 		"whoIsSethDaniel/mason-tool-installer.nvim",
 		-- "nvim-java/nvim-java",
-		{ "j-hui/fidget.nvim", opts = {} },
+		{ "j-hui/fidget.nvim", tag="v1.6.1" , opts = {} },
 		"rcarriga/nvim-notify",
 	},
 	config = function()
