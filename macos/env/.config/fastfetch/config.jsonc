@@ -102,9 +102,14 @@
   },
   {
     "type": "display",
-    "key": " └  ",
+    "key": " ├  ",
     "compactType": "original-with-refresh-rate",
     "keyColor": "33",
+  },
+  {
+    "type": "uptime",
+    "Key": " └ UP",
+    "keyColor": "33"
   },
   "break",
   "break",
