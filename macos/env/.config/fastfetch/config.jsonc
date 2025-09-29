@@ -108,7 +108,7 @@
   },
   {
     "type": "uptime",
-    "Key": " └ UP",
+    "key": " └ UP",
     "keyColor": "33"
   },
   "break",

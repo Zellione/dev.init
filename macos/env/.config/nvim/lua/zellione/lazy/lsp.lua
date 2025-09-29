@@ -109,7 +109,7 @@ return {
 
 		local ensure_installed = vim.tbl_keys(servers or {})
 		vim.list_extend(ensure_installed, {
-			"codelldb",
+			-- "codelldb",
 			"lua_ls",
 			"rust_analyzer",
 			"ts_ls",
