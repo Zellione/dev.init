@@ -111,7 +111,7 @@ return {
 		vim.list_extend(ensure_installed, {
 			-- "codelldb",
 			"lua_ls",
-			"rust_analyzer",
+			-- "rust_analyzer",
 			"ts_ls",
 			"eslint",
 			"clangd",
@@ -126,7 +126,7 @@ return {
         for name,_ in pairs(servers) do
             local server = servers[name] or {}
             server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-            require('lspconfig')[name].setup(server)
+            vim.lsp.config(name, server)
         end
 
 		require("mason-lspconfig").setup({})
