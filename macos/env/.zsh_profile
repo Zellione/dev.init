@@ -22,6 +22,8 @@ addToPathFront /opt/homebrew/bin/brew
 tmux=$(which tmux)
 alias tmux="$tmux -2"
 
+alias mlx="mlx_lm.server --port 8080"
+
 _robocop_completion() {
   eval $(env _TYPER_COMPLETE_ARGS="${words[1,$CURRENT]}" _ROBOCOP_COMPLETE=complete_zsh robocop)
 }
