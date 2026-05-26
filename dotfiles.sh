@@ -73,8 +73,6 @@ update_files "$DEV_ENV/env/.local" "$HOME/.local"
 copy "$DEV_ENV/env/.zsh_profile" "$HOME/.zsh_profile"
 copy "$DEV_ENV/env/.zshrc" "$HOME/.zshrc"
 
-copy "$DEV_ENV/env/.zshrc" "$HOME/.zshrc"
-
 copy "$DEV_ENV/env/.tmux-cht-command" "$HOME/.tmux-cht-command"
 copy "$DEV_ENV/env/.tmux-cht-languages" "$HOME/.tmux-sessionizer"
 copy "$DEV_ENV/env/.tmux.conf" "$HOME/.tmux.conf"

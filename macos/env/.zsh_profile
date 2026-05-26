@@ -1,5 +1,5 @@
 export XDG_CONFIG_HOME=$HOME/.config
-VIM="/Users/sna06/neovim/nvim-macos-arm64/bin/nvim"
+VIM=nvim
 PERSONAL=$XDG_CONFIG_HOME/personal
 
 bindkey -s ^f "tmux-sessionizer\n"
@@ -9,7 +9,7 @@ for i in `find -L $PERSONAL`; do
     source $i
 done
 
-fzf_dir=`ls -d /Users/sna06/homebrew/Cellar/fzf/* | head -n 1`/shell
+fzf_dir=`ls -d /opt/homebrew/Cellar/fzf/* | head -n 1`/shell
 if [ -d $fzf_dir ]; then
     source $fzf_dir/key-bindings.zsh
     source $fzf_dir/completion.zsh
@@ -21,3 +21,9 @@ addToPathFront /opt/homebrew/bin/brew
 
 tmux=$(which tmux)
 alias tmux="$tmux -2"
+
+_robocop_completion() {
+  eval $(env _TYPER_COMPLETE_ARGS="${words[1,$CURRENT]}" _ROBOCOP_COMPLETE=complete_zsh robocop)
+}
+
+compdef _robocop_completion robocop
