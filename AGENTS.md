@@ -1,23 +1,52 @@
 # AGENTS.md — dotfiles repo
 
+## Architecture overview
+
+Libraries define functions; wrappers set `DEV_ENV`, source the library, then call its main function.
+
+| Library | Wrapper(s) | Main function called |
+|---|---|---|
+| `dotfiles.sh` | `macos-dotfiles.sh`, `linux-dotfiles.sh` | `deploy_dotfiles "$@"` |
+| `run.sh` | `macos-run.sh`, `linux-run.sh` | `run_scripts "<pattern>"` |
+
+Libraries have source guards — they refuse to run if executed directly. They only become useful when sourced by a wrapper.
+
 ## Setup & run order (macOS only)
 
-1. Run setup scripts from `macos/runs/` first installs via `run.sh` or individual `.sh/.zsh` files. Homebrew is the root dependency.
-2. Deploy configs with `./dotfiles.sh [--dry]`. Requires `DEV_ENV=macos` (or `linux`) env var set.
+1. Run setup scripts from `macos/runs/` first — they install via Homebrew (the root dependency).
+2. Deploy configs after that.
 
 Exact commands:
+```bash
+./macos-dotfiles.sh [--dry]     # deploy macOS configs
+./linux-dotfiles.sh [--dry]      # deploy Linux configs
+./macos-run.sh [--dry] [grep]    # run macOS setup scripts, filtered by grep pattern
+
+# Or use absolute paths from anywhere in the repo:
+/home/zellione/dev\.init/macos-dotfiles.sh --dry
 ```
-DEV_ENV=$(pwd)/macos ./dotfiles.sh         # deploy macOS configs
-DEV_ENV/($PWD)$macos) $macos-run        --run [grep pattern]  # run setup scripts, filtered by pattern
-./linux-dotfiles.sh [--dry]                # deploy Linux configs (alias: DEV_ENV=$(pwd)/linux ./dotfiles.sh)
+
+## Tool path gotcha — escaping `.` in file tool paths
+
+**File tools (glob/read/write/grep) treat `.` as a glob wildcard, breaking paths containing it.**
+The repo itself is named `dev.init`, so:
+
+- ❌ `read`/`glob` on `/home/zellione/dev.init/foo.sh` — may fail silently or match wrong files
+- ✅ Use `bash` commands for all `.sh` file I/O — they handle unescaped paths correctly
+
+If you need to search the repo, prefer `_bash_` (not glob/read) when the path includes `dev\.init`:
+```bash
+cat /home/zellione/dev.init/macos-dotfiles.sh   # works fine in bash
+grep -r "pattern" /home/zellione/dev.init/      # works fine in bash
+find /home/zellione/dev.init -name "*.sh"       # works fine in bash
 ```
 
 ## What `DEV_ENV` resolves to
 
 - Each platform directory (`linux/`, `macos/`) contains two subdirectories:
   - `env/` — dotfiles and config dirs to be copied onto the system
-  - `runs/` (macOS only, Linux has an empty placeholder) — executable setup scripts
-- The deployment scripts use glob to find all directories inside `<platform>/env/` subdirs (`_config/`, `_local/`, and top-level dotfiles).
+  - `runs/` (macOS only, Linux has empty) — executable setup scripts
+- The deployment scripts find all directories inside `<platform>/env/` (`_config/`, `_local/`, and top-level dotfiles).
 
 ## Neovim architecture
 
@@ -44,6 +73,7 @@ Config overrides and aliases live in `macos/env/.config/personal/`:
 
 - `dotfiles.sh` **removes** target dirs before copying. Run with `--dry` to preview destructive operations.
 - The `run.sh` scripts delete the destination (`$HOME/nvim`, `$NEOVIM_FOLDER`) before reinstalling.
-- Linux `runs/` dir is empty; Linux has no equivalent to macOS `macos-run.sh`.
+- Linux `runs/` dir is empty; `linux-run.sh` exits with an error if called directly.
 - The repo contains **no tests, no build step, no lint**. It's purely config deployment (shell scripts + dotfiles).
-- NVM (neovim) plugin state (installed packages, lockfile) lives in the lazy-lock.json — if plugins are missing after a fresh install, run `nvim` once to trigger lazy.nvim package installation.
+- Neovim plugin state (installed packages, lockfile) lives in the lazy-lock.json — if plugins are missing after a fresh install, run `nvim` once to trigger lazy.nvim package installation.
+- **Never execute `dotfiles.sh` or `run.sh` directly** — they will refuse with an error because of source guards. Always use the wrapper scripts (`./macos-dotfiles.sh`, etc.).
