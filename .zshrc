@@ -2,9 +2,12 @@ export ZSH="$HOME/.oh-my-zsh"
 
 plugins=(
     git
+    golang
     zsh-autosuggestions
     zsh-syntax-highlighting
     zsh-npm-scripts-autocomplete
+    fzf-zsh-plugin
+    zsh-fzf-history-search
 )
 
 # Set name of the theme to load --- if set to "random", it will
@@ -85,7 +88,7 @@ source $ZSH/oh-my-zsh.sh
 # Project page: https://gitlab.com/phoneybadger/pokemon-colorscripts#on-other-distros-and-macos
 #pokemon-colorscripts --no-title -s -r
 
-alias ll="ls -ltra"
+alias ll="ls -la"
 alias gd="git diff"
 alias gcmsg="git commit -m"
 # alias gitc="git checkout"
@@ -125,9 +128,6 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Load Angular CLI autocompletion.
-source <(ng completion script)
-
 # opencode
 export PATH=/home/zellione/.opencode/bin:$PATH
 
@@ -140,10 +140,15 @@ if [ -d "$HOME/.local/bin" ] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
 fi
 
 # Auto-start wsl-screenshot-cli (added by installer)
-wsl-screenshot-cli start --daemon 2>/dev/null
+wsl-screenshot-cli start --daemon --quiet 2>/dev/null
 . "$HOME/.cargo/env"
 
 # WSLg PulseAudio (for Claude Code /voice)
 export PULSE_SERVER=unix:/mnt/wslg/runtime-dir/pulse/native
 
+# Browser for Claude
 export BROWSER="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+
+# LSP tooling paths
+export PATH=$PATH:$HOME/.local/go/bin:$HOME/go/bin:$HOME/.cargo/bin
+source "$HOME/.cargo/env" 2>/dev/null || true
