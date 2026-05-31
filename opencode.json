@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "lsp": true,
+  "mode": {
+    "plan": {
+      "model": "local-wsl-llama/qwen36-35b-a3b"
+    },
+    "build": {
+      "model": "local-wsl-llama/qwen36-35b-a3b"
+    }
+  },
+  "provider": {
+    "local-wsl-llama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Local WSL Llama",
+      "options": {
+        "baseURL": "http://127.0.0.1:8001/v1"
+      },
+      "models": {
+        "qwen36-35b-a3b": {
+          "tools": true,
+	  "limit": {
+		"context": 262144,
+		"output": 262144
+	  }
+        }
+      }
+    }
+  },
+  "model": "qwen36-35b-a3b"
+}
