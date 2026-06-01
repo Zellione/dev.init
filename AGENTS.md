@@ -77,3 +77,5 @@ Config overrides and aliases live in `macos/env/.config/personal/`:
 - The repo contains **no tests, no build step, no lint**. It's purely config deployment (shell scripts + dotfiles).
 - Neovim plugin state (installed packages, lockfile) lives in the lazy-lock.json — if plugins are missing after a fresh install, run `nvim` once to trigger lazy.nvim package installation.
 - **Never execute `dotfiles.sh` or `run.sh` directly** — they will refuse with an error because of source guards. Always use the wrapper scripts (`./macos-dotfiles.sh`, etc.).
+- **Never execute any of the `dotfiles-macos.sh` or `run-macos.sh`** without asking.
+- **Always** use DRY_RUN if trying to execute a script.
