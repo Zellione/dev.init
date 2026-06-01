@@ -3,40 +3,39 @@ local M = {}
 M.setup = function()
 	require("mason").setup()
 
-	require("mason-tool-installer").setup({
-		ensure_installed = {
-			"lua_ls",
-			"ts_ls",
-			"eslint",
-			"clangd",
-			"jedi_language_server",
-			"phpactor",
-			"zls",
-			"gopls",
-			"jdtls",
-			"robotcode",
-		},
-	})
-
+	-- Maps lspconfig server name -> mason package name. They differ for several
+	-- servers (lua_ls vs lua-language-server, etc.), so we maintain this table
+	-- explicitly now that mason-lspconfig is no longer pulling the translations.
 	local servers = {
-		"lua_ls",
-		"ts_ls",
-		"eslint",
-		"clangd",
-		"jedi_language_server",
-		"phpactor",
-		"zls",
-		"gopls",
-		"jdtls",
-		"robotcode",
+		{ lsp = "lua_ls",               mason = "lua-language-server" },
+		{ lsp = "ts_ls",                mason = "typescript-language-server" },
+		{ lsp = "eslint",               mason = "eslint-lsp" },
+		{ lsp = "clangd",               mason = "clangd" },
+		{ lsp = "jedi_language_server", mason = "jedi-language-server" },
+		{ lsp = "phpactor",             mason = "phpactor" },
+		{ lsp = "zls",                  mason = "zls" },
+		{ lsp = "gopls",                mason = "gopls" },
+		{ lsp = "jdtls",                mason = "jdtls" },
+		{ lsp = "robotcode",            mason = "robotcode" },
 	}
 
-	for _, name in ipairs(servers) do
+	local mason_packages = vim.tbl_map(function(s)
+		return s.mason
+	end, servers)
+	local lsp_names = vim.tbl_map(function(s)
+		return s.lsp
+	end, servers)
+
+	require("mason-tool-installer").setup({
+		ensure_installed = mason_packages,
+	})
+
+	for _, name in ipairs(lsp_names) do
 		local ok, conf = pcall(require, "zellione.lsp." .. name)
 		vim.lsp.config(name, ok and conf or {})
 	end
 
-	vim.lsp.enable(servers)
+	vim.lsp.enable(lsp_names)
 
 	local capabilities = vim.lsp.protocol.make_client_capabilities()
 	capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
