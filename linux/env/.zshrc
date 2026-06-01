@@ -148,6 +148,9 @@ export PULSE_SERVER=unix:/mnt/wslg/runtime-dir/pulse/native
 # Browser for Claude
 export BROWSER="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
 
+# Show us the colors baby
+export COLORTERM=truecolor
+
 # LSP tooling paths
 export PATH=$PATH:$HOME/.local/go/bin:$HOME/go/bin:$HOME/.cargo/bin
 source "$HOME/.cargo/env" 2>/dev/null || true

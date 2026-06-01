@@ -3,10 +3,10 @@
   "lsp": true,
   "mode": {
     "plan": {
-      "model": "local-wsl-llama/qwen25-coder-14b-instruct"
+      "model": "local-wsl-llama/qwen36-27b"
     },
     "build": {
-      "model": "local-wsl-llama/qwen25-coder-14b-instruct"
+      "model": "local-wsl-llama/qwen36-27b"
     }
   },
   "provider": {
@@ -20,22 +20,22 @@
         "qwen36-27b": {
           "tools": true,
 	  "limit": {
-		"context": 16128,
-		"output": 16128
+		"context": 64000,
+		"output": 4096
 	  }
         },
         "qwen36-35b-a3b": {
           "tools": true,
 	  "limit": {
 		"context": 262144,
-		"output": 262144
+		"output": 8192
 	  }
         },
         "qwen25-coder-14b-instruct": {
           "tools": true,
 	  "limit": {
 		"context": 32768,
-		"output": 32768
+		"output": 4096
 	  }
         }
       }
