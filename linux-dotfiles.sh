@@ -20,6 +20,7 @@ deploy_dotfiles() {
     update_files "$env_base/env/.config" "$XDG_CONFIG_HOME"
     update_files "$env_base/env/.local"  "$HOME/.local"
 
+    deploy_file "$env_base/env/.claude/settings.json" "$HOME/.claude/settings.json"
     # deploy_file "$env_base/env/.zsh_profile"     "$HOME/.zsh_profile"
     # deploy_file "$env_base/env/.zshrc"            "$HOME/.zshrc"
     # deploy_file "$env_base/env/.tmux-cht-command"  "$HOME/.tmux-cht-command"
