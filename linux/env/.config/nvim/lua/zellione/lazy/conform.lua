@@ -7,24 +7,25 @@ return {
 			lsp_format = "fallback",
 		},
 		formatters_by_ft = {
-			lua = { "stylua" },
-			-- Conform can also run multiple formatters sequentially
-			-- python = { "isort", "black" },
-			--
-			-- You can use a sub-list to tell conform to run *until* a formatter
-			-- is found.
-			javascript = { "prettierd", "prettier", stop_after_first = true },
-			typescript = { "prettierd", "prettier", stop_after_first = true },
-			html = { "prettierd", "prettier", stop_after_first = true },
-			scss = { "prettierd", "prettier", stop_after_first = true },
-			json = { "jq" },
-			go = { "goimports", "gofmt" },
+			lua = { "trim_whitespace", "stylua" },
+			python = { "trim_whitespace", "isort", "black" },
+			javascript = { "trim_whitespace", "prettierd", "prettier", stop_after_first = true },
+			typescript = { "trim_whitespace", "prettierd", "prettier", stop_after_first = true },
+			html = { "trim_whitespace", "prettierd", "prettier", stop_after_first = true },
+			scss = { "trim_whitespace", "prettierd", "prettier", stop_after_first = true },
+			json = { "trim_whitespace", "jq" },
+			go = { "trim_whitespace", "goimports", "gofmt" },
 		},
-		-- formatters = {
-		-- 	shfmt = {
-		-- 		prepend_args = { "-i", "2" },
-		-- 	},
-		-- },
+		formatters = {
+			trim_whitespace = {
+				meta = {
+					description = "Trim trailing whitespace (tabs/spaces at end of line)",
+					require_solution = false,
+				},
+				command = "perl",
+				args = { "-pi", "-e", [[s/[ \t]+$//]] },
+			},
+		},
 	},
 	keys = {
 		{
