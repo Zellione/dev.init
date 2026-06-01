@@ -1,6 +1,6 @@
 return {
 	"serenevoid/kiwi.nvim",
-	depedencies = {
+	dependencies = {
 		"nvim-lua/plenary.nvim",
 	},
 	opts = {
