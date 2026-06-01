@@ -1,5 +1,3 @@
-vim.opt.guicursor = ""
-
 vim.opt.nu = true
 vim.opt.relativenumber = true
 
@@ -28,6 +26,11 @@ vim.opt.isfname:append("@-@")
 
 vim.opt.updatetime = 50
 
-vim.opt.colorcolumn = "80"
-
 vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "lua", "python", "rust", "go", "c", "cpp", "javascript", "typescript" },
+	callback = function()
+		vim.opt_local.colorcolumn = "100"
+	end,
+})
