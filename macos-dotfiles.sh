@@ -16,8 +16,9 @@ deploy_dotfiles() {
 
     local env_base="${DEV_ENV%/}"
 
+    update_files "./common/env/.config"  "$XDG_CONFIG_HOME"
     update_files "$env_base/env/.config" "$XDG_CONFIG_HOME"
-    update_files "$env_base/env/.local"   "$HOME/.local"
+    update_files "$env_base/env/.local"  "$HOME/.local"
 
     deploy_file "$env_base/env/.zsh_profile"     "$HOME/.zsh_profile"
     deploy_file "$env_base/env/.zshrc"            "$HOME/.zshrc"

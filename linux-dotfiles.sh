@@ -16,15 +16,16 @@ deploy_dotfiles() {
 
     local env_base="${DEV_ENV%/}"
 
+    update_files "./common/env/.config"  "$XDG_CONFIG_HOME"
     update_files "$env_base/env/.config" "$XDG_CONFIG_HOME"
-    update_files "$env_base/env/.local"   "$HOME/.local"
+    update_files "$env_base/env/.local"  "$HOME/.local"
 
-    deploy_file "$env_base/env/.zsh_profile"     "$HOME/.zsh_profile"
-    deploy_file "$env_base/env/.zshrc"            "$HOME/.zshrc"
-    deploy_file "$env_base/env/.tmux-cht-command"  "$HOME/.tmux-cht-command"
-    deploy_file "$env_base/env/.tmux-cht-languages" "$HOME/.tmux-sessionizer"
-    deploy_file "$env_base/env/.tmux.conf"         "$HOME/.tmux.conf"
-    deploy_file "$env_base/env/.tmux-sessionizer"  "$HOME/.tmux-sessionizer"
+    # deploy_file "$env_base/env/.zsh_profile"     "$HOME/.zsh_profile"
+    # deploy_file "$env_base/env/.zshrc"            "$HOME/.zshrc"
+    # deploy_file "$env_base/env/.tmux-cht-command"  "$HOME/.tmux-cht-command"
+    # deploy_file "$env_base/env/.tmux-cht-languages" "$HOME/.tmux-sessionizer"
+    # deploy_file "$env_base/env/.tmux.conf"         "$HOME/.tmux.conf"
+    # deploy_file "$env_base/env/.tmux-sessionizer"  "$HOME/.tmux-sessionizer"
 
     log "dotfiles deployment complete."
 }
