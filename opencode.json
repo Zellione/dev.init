@@ -20,7 +20,7 @@
         "qwen36-27b": {
           "tools": true,
 	  "limit": {
-		"context": 16128,
+		"context": 64000,
 		"output": 4096
 	  }
         },
