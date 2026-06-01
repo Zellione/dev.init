@@ -5,7 +5,6 @@ return {
 	config = function()
 		vim.cmd.colorscheme("tokyonight-night")
 
-		vim.api.nvim_set_hl(0, "Comment", { gui = "none" })
-		vim.api.nvim_set_hl(0, "Bold", { bold = true })
+		vim.api.nvim_set_hl(0, "Comment", { italic = false, bold = false })
 	end,
 }
