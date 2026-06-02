@@ -125,7 +125,9 @@ alias gcmsg="git commit -m"
 
 
 # Load Angular CLI autocompletion.
-source <(ng completion script)
+# Disabled: spawns Node.js on every shell start. To restore tab-completion,
+# run once: ng completion script >> ~/.zshrc
+# source <(ng completion script)
 
 # Load fzf Git completion
 source ~/tools/fzf-git.sh.git/fzf-git.sh

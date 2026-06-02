@@ -4,6 +4,48 @@ Personal dotfiles and machine setup for macOS (and Linux). See [AGENTS.md](AGENT
 
 ---
 
+## macOS shell startup performance
+
+New terminal windows and tmux panes were slow to become interactive (~1–2s) due to blocking operations in `.zshrc` and `.zsh_profile`.
+
+### Fixes applied
+
+**`macos/env/.zshrc`** — Disabled Angular CLI autocompletion on startup:
+```zsh
+# source <(ng completion script)
+```
+This was spawning a full Node.js + Angular CLI process on every shell open. If you need `ng` tab-completion, run once to bake the static output into your live `~/.zshrc`:
+```bash
+ng completion script >> ~/.zshrc
+```
+
+**`macos/env/.zsh_profile`** — Replaced `find` loop with explicit sources:
+```zsh
+# Before (re-sourced env a second time, tried to source the directory itself):
+for i in `find -L $PERSONAL`; do source $i; done
+
+# After:
+source $PERSONAL/alias
+source $PERSONAL/paths
+```
+
+Also replaced dynamic fzf path discovery with the stable Homebrew opt symlink:
+```zsh
+# Before:
+fzf_dir=`ls -d /opt/homebrew/Cellar/fzf/* | head -n 1`/shell
+
+# After:
+fzf_dir=/opt/homebrew/opt/fzf/shell
+```
+
+### Measuring startup time
+
+```bash
+time zsh -i -c exit
+```
+
+---
+
 ## nvim-treesitter v1.0+ migration notes
 
 Neovim 0.12+ is not compatible with the frozen `master` branch of nvim-treesitter. The `main` branch is the v1.0 rewrite that tracks current Neovim.
