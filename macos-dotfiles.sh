@@ -26,6 +26,7 @@ deploy_dotfiles() {
     deploy_file "$env_base/env/.tmux-cht-languages" "$HOME/.tmux-sessionizer"
     deploy_file "$env_base/env/.tmux.conf"         "$HOME/.tmux.conf"
     deploy_file "$env_base/env/.tmux-sessionizer"  "$HOME/.tmux-sessionizer"
+    deploy_file "$env_base/env/.claude/settings.json" "$HOME/.claude/settings.json"
 
     log "dotfiles deployment complete."
 }

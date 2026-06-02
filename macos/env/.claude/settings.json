@@ -1,0 +1,50 @@
+{
+  "env": {
+    "CLAUDE_MAX_CONTEXT_WINDOW": "200000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
+    "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "model": "sonnet",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash /Users/sebastian_nagels/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "pyright-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "robotcode-lsp@local": true
+  },
+  "extraKnownMarketplaces": {
+    "local": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/sebastian_nagels/.claude/plugins/local/my-marketplace"
+      }
+    },
+    "claude-code-lsps": {
+      "source": {
+        "source": "github",
+        "repo": "boostvolt/claude-code-lsps"
+      }
+    }
+  },
+  "theme": "dark"
+}
