@@ -2,8 +2,8 @@ return {
 	"nvim-treesitter/nvim-treesitter",
 	branch = "main",
 	build = ":TSUpdate",
-	opts = {
-		ensure_installed = {
+	config = function()
+		require("nvim-treesitter.install").install({
 			"bash",
 			"cpp",
 			"html",
@@ -12,10 +12,8 @@ return {
 			"typescript",
 			"jsdoc",
 			"go",
-		},
-	},
-	config = function(_, opts)
-		require("nvim-treesitter").setup(opts)
+			"json",
+		})
 		vim.api.nvim_create_autocmd("FileType", {
 			callback = function(ev)
 				pcall(vim.treesitter.start, ev.buf)
