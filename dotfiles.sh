@@ -30,6 +30,7 @@ setup_xdg() {
     fi
 }
 
+# this method should probably fail silently
 update_files() {
     local src_dir="$1"
     local dest_dir="${2%/}"
