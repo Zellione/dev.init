@@ -61,7 +61,10 @@ deploy_file() {
         log "removing: ${RED}${dest}${ENCOLOR}"
         if [[ "${DRY_RUN:-0}" == "0" ]]; then rm -f "$dest"; fi
         log "copying: ${YELLOW}${src}${ENCOLOR} -> ${dest}${ENCOLOR}"
-        if [[ "${DRY_RUN:-0}" == "0" ]]; then cp "${src}" "${dest}"; fi
+        if [[ "${DRY_RUN:-0}" == "0" ]]; then
+            mkdir -p "$(dirname "$dest")"
+            cp "${src}" "${dest}"
+        fi
     else
         log "skipping (not found): ${src}"
     fi
