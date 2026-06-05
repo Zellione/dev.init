@@ -16,6 +16,9 @@ PACKAGES=(
     kitty
     thunar
 
+    # Editor
+    neovim
+
     # Status Bar + Menus + Lock
     waybar
     rofi
@@ -45,6 +48,7 @@ PACKAGES=(
     jq
     curl
     polkit
+    rsync
 
     # Qt/GTK Theming
     qt5ct
@@ -67,6 +71,7 @@ PACKAGES=(
     # System monitoring
     gnome-system-monitor
     nvtop
+    fastfetch
 )
 
 echo "Installing pacman packages..."

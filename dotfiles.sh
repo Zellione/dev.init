@@ -35,7 +35,7 @@ update_files() {
     local src_dir="$1"
     local dest_dir="${2%/}"
 
-    log "copying over files from: ${src_dir}"
+    log "syncing files from: ${src_dir}"
     pushd "$src_dir" &>/dev/null || return 1
 
     echo ""
@@ -43,11 +43,11 @@ update_files() {
     configs=$(find . -mindepth 1 -maxdepth 1 -type d)
     for c in $configs; do
         target="$dest_dir/${c#./}"
-        log "   removing: rm -rf ${RED}${target}${ENCOLOR}"
-        if [[ "${DRY_RUN:-0}" == "0" ]]; then rm -rf "$target"; fi
-
-        log "   copying: ${YELLOW}${c}${ENCOLOR} -> $dest_dir/"
-        if [[ "${DRY_RUN:-0}" == "0" ]]; then cp -r "./$c" "$dest_dir"; fi
+        log "   syncing: ${YELLOW}${c}${ENCOLOR} -> ${target}"
+        if [[ "${DRY_RUN:-0}" == "0" ]]; then
+            mkdir -p "$target"
+            rsync -a --delete "./$c/" "$target/"
+        fi
     done
     echo ""
     popd &>/dev/null || return 1

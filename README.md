@@ -58,6 +58,12 @@ docker compose run --rm test
 docker compose run --rm shell
 ```
 
+### Cleanup
+
+```bash
+docker rmi devinit-arch
+```
+
 ### What the tests verify
 
 1. `linux-arch-run.sh --dry` — exits cleanly (runs/ is empty)

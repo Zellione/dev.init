@@ -93,6 +93,8 @@ check_dir  "Cava config"        "$HOME/.config/cava"
 check_dir  "Qt5ct config"       "$HOME/.config/qt5ct"
 check_dir  "Qt6ct config"       "$HOME/.config/qt6ct"
 check_dir  "Swappy config"      "$HOME/.config/swappy"
+check_dir  "btop config"        "$HOME/.config/btop"
+check_dir  "fastfetch config"   "$HOME/.config/fastfetch"
 
 # Common configs (deploy_file calls for .tmux.conf, .zshrc are commented out in the wrapper)
 check_dir  "Claude settings"    "$HOME/.claude"
@@ -146,11 +148,15 @@ check_bin  "cava"           "cava"
 check_bin  "mpv"            "mpv"
 check_bin  "playerctl"      "playerctl"
 
-# System
+# System monitoring
 check_bin  "brightnessctl"  "brightnessctl"
 check_bin  "btop"           "btop"
 check_bin  "jq"             "jq"
 check_bin  "curl"           "curl"
+check_bin  "fastfetch"      "fastfetch"
+
+# Editor
+check_bin  "Neovim"         "nvim"
 
 # Theming
 check_bin  "qt5ct"          "qt5ct"
@@ -160,6 +166,9 @@ check_bin  "kvantummanager" "kvantummanager"
 # AUR packages
 check_bin  "wallust"        "wallust"
 check_bin  "paru"           "paru"
+
+# Utilities
+check_bin  "Rsync"          "rsync"
 
 # Fonts
 check_bin  "fc-list"        "fc-list"
