@@ -21,10 +21,6 @@ RUN bash /workspace/linux/arch/runs/01-aur.sh
 RUN bash /workspace/linux/arch/runs/03-aur-packages.sh
 USER root
 
-# Prepare home directory for dotfiles deployment
-RUN mkdir -p /home/testuser/.claude /home/testuser/.config/opencode \
-    && chown -R testuser:testuser /home/testuser/.claude /home/testuser/.config
-
 RUN chown -R testuser:testuser /workspace
 
 USER testuser
