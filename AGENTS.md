@@ -85,6 +85,11 @@ cd docker && docker compose run --rm test
 
 The container runs as `testuser` (non-root), tests both dry-run and real deploy, and verifies all expected config dirs exist under `$HOME/.config/`.
 
+After testing, clean up the build image:
+```bash
+docker rmi devinit-arch
+```
+
 ## Gotchas
 
 - `dotfiles.sh` **removes** target dirs before copying. Run with `--dry` to preview destructive operations.
