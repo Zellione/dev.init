@@ -69,6 +69,22 @@ Config overrides and aliases live in `macos/env/.config/personal/`:
 - `env` — environment variables loaded by `.zshrc`
 - `paths` — PATH modifications
 
+## Testing Linux Arch changes
+
+**Always test Linux Arch script changes in the Docker container** — never run `linux-arch-dotfiles.sh` or `linux-arch-run.sh` directly on the host.
+
+```bash
+docker build -t devinit-arch -f docker/Dockerfile .
+docker run --rm devinit-arch
+```
+
+Or use docker compose:
+```bash
+cd docker && docker compose run --rm test
+```
+
+The container runs as `testuser` (non-root), tests both dry-run and real deploy, and verifies all expected config dirs exist under `$HOME/.config/`.
+
 ## Gotchas
 
 - `dotfiles.sh` **removes** target dirs before copying. Run with `--dry` to preview destructive operations.
