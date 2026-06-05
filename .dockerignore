@@ -1,0 +1,7 @@
+.git
+macos/
+macos-dotfiles.sh
+macos-run.sh
+lazy-lock.json
+AGENTS.md
+docker/README.md
