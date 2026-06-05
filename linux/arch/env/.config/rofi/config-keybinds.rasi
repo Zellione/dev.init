@@ -1,0 +1,19 @@
+/* Keybinds Config */
+
+@import "~/.config/rofi/master-config.rasi"
+
+/* ---- Entry ---- */
+entry {
+  width: 80%;
+  placeholder: "❯ Keybinds reference — navigation only, no actions";
+}
+
+/* ---- Listview ---- */
+listview {
+  columns: 2;
+  lines: 12;
+}
+
+window {
+  width: 90%;
+}

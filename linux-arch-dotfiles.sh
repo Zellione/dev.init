@@ -20,6 +20,10 @@ deploy_dotfiles() {
     update_files "$env_base/common/env/.config" "$XDG_CONFIG_HOME"
     update_files "$env_base/common/env/.local"  "$HOME/.local"
 
+    # Arch-specific — Hyprland ecosystem
+    update_files "$env_base/arch/env/.config" "$XDG_CONFIG_HOME"
+    update_files "$env_base/arch/env/.local"  "$HOME/.local"
+
     deploy_file "$env_base/common/env/.claude/settings.json" "$HOME/.claude/settings.json"
     deploy_file "$env_base/common/env/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
 

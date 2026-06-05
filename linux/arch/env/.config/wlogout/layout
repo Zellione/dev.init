@@ -1,0 +1,48 @@
+{
+    "label" : "lock",
+    "action" : "$HOME/.config/hypr/scripts/lock_screen.sh",
+    "text" : "Lock",
+    "keybind" : "l",
+    "height" : 0.18,
+    "width" : 0.5
+}
+{
+    "label" : "logout",
+    "action" : "pkill -x Hyprland",
+    "text" : "Logout",
+    "keybind" : "e",
+    "height" : 0.18,
+    "width" : 0.5
+}
+{
+    "label" : "suspend",
+    "action" : "systemctl suspend",
+    "text" : "Suspend",
+    "keybind" : "u",
+    "height" : 0.18,
+    "width" : 0.5
+}
+{
+    "label" : "hibernate",
+    "action" : "systemctl hibernate",
+    "text" : "Hibernate",
+    "keybind" : "h",
+    "height" : 0.18,
+    "width" : 0.5
+}
+{
+    "label" : "reboot",
+    "action" : "systemctl reboot",
+    "text" : "Reboot",
+    "keybind" : "r",
+    "height" : 0.18,
+    "width" : 0.5
+}
+{
+    "label" : "shutdown",
+    "action" : "systemctl poweroff",
+    "text" : "Shutdown",
+    "keybind" : "s",
+    "height" : 0.18,
+    "width" : 0.5
+}

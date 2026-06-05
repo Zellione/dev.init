@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+SENTINEL=/tmp/hyprland-intentional-exit
+while true; do
+    rm -f $SENTINEL
+    /usr/bin/start-hyprland
+    code=$?
+    if [[ -f $SENTINEL ]]; then
+        rm -f $SENTINEL
+        exit 0
+    fi
+    if [[ $code -eq 0 ]]; then
+        exit 0
+    fi
+    logger -t hyprland-wrapper "Hyprland crashed (exit $code), restarting in 2s"
+    sleep 2
+done

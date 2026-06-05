@@ -1,0 +1,15 @@
+/* Emoji Config */
+
+@import "~/.config/rofi/master-config.rasi"
+
+/* ---- Entry ---- */
+entry {
+  width: 37%;
+  placeholder: "❯ Search emoji — Enter to select, Ctrl V to paste";
+}
+
+/* ---- Listview ---- */
+listview {
+  columns: 1;
+  lines: 8;
+}
