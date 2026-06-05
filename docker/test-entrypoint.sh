@@ -105,6 +105,67 @@ check_file "Hyprland launcher"  "$HOME/.local/bin/hyprland-launcher"
 
 echo ""
 
+# ── Test 5: Verify installed packages ────────────────────────────
+info "Test 5: Verify installed packages"
+
+check_bin() {
+    local desc="$1" bin="$2"
+    if command -v "$bin" &>/dev/null; then
+        pass "$desc installed: $bin"
+    else
+        fail "$desc missing: $bin"
+    fi
+}
+
+# Core Hyprland
+check_bin  "Hyprland"       "Hyprland"
+check_bin  "hyprctl"        "hyprctl"
+check_bin  "hyprlock"       "hyprlock"
+check_bin  "hypridle"       "hypridle"
+
+# Terminal + File Manager
+check_bin  "Kitty"          "kitty"
+check_bin  "Thunar"         "thunar"
+
+# Status Bar + Menus
+check_bin  "Waybar"         "waybar"
+check_bin  "Rofi"           "rofi"
+check_bin  "wlogout"        "wlogout"
+check_bin  "SwayNC"         "swaync-client"
+
+# Screenshots + Clipboard
+check_bin  "Grim"           "grim"
+check_bin  "Slurp"          "slurp"
+check_bin  "Swappy"         "swappy"
+check_bin  "wl-paste"       "wl-paste"
+check_bin  "cliphist"       "cliphist"
+
+# Audio
+check_bin  "pamixer"        "pamixer"
+check_bin  "cava"           "cava"
+check_bin  "mpv"            "mpv"
+check_bin  "playerctl"      "playerctl"
+
+# System
+check_bin  "brightnessctl"  "brightnessctl"
+check_bin  "btop"           "btop"
+check_bin  "jq"             "jq"
+check_bin  "curl"           "curl"
+
+# Theming
+check_bin  "qt5ct"          "qt5ct"
+check_bin  "qt6ct"          "qt6ct"
+check_bin  "kvantummanager" "kvantummanager"
+
+# AUR packages
+check_bin  "wallust"        "wallust"
+check_bin  "paru"           "paru"
+
+# Fonts
+check_bin  "fc-list"        "fc-list"
+
+echo ""
+
 # ── Summary ──────────────────────────────────────────────────────
 echo "========================================="
 if [ "$FAILURES" -eq 0 ]; then
