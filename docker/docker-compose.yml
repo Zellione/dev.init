@@ -1,0 +1,20 @@
+services:
+  test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: devinit-arch-test
+    volumes:
+      - ..:/workspace
+    entrypoint: ["bash", "docker/test-entrypoint.sh"]
+
+  shell:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: devinit-arch-shell
+    volumes:
+      - ..:/workspace
+    entrypoint: ["bash"]
+    stdin_open: true
+    tty: true
