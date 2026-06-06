@@ -1,0 +1,4 @@
+alias vim="$VIM"
+alias python="python3"
+
+alias dotFileInstall="$DOTFILES/install"
