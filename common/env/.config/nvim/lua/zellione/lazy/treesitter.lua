@@ -1,8 +1,13 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
+	lazy = false,
 	build = ":TSUpdate",
-	opts = {
-		ensure_installed = {
+	config = function()
+		require("nvim-treesitter").setup {
+			install_dir = vim.fn.stdpath("data") .. "/site",
+		}
+
+		require("nvim-treesitter").install {
 			"bash",
 			"c",
 			"cpp",
@@ -17,14 +22,7 @@ return {
 			"typescript",
 			"jsdoc",
 			"go",
-			"gosum",
-			"gotmpl",
-		},
-		highlight = { enable = true },
-		indent = { enable = true },
-	},
-	config = function(_, opts)
-		require("nvim-treesitter.configs").setup(opts)
+		}
 
 		-- Register markdown_inline as an embedded language of markdown so
 		-- treesitter-context (and highlighting) follow it inside markdown files.

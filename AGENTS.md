@@ -50,10 +50,10 @@ find /home/zellione/dev.init -name "*.sh"       # works fine in bash
 
 ## Neovim architecture
 
-- Entry: `nvim/lua/zellione/init.lua` loads in order: `set`, `remap`, then lazy_init
-- Lazy.nvim manages all plugins. Each concern has its own module under `nvim/lua/zellione/lazy/`:
+- Entry: `common/env/.config/nvim/lua/zellione/init.lua` loads in order: `set`, `remap`, then `lazy_init`
+- Lazy.nvim manages all plugins. Each concern has its own module under `common/env/.config/nvim/lua/zellione/lazy/`:
   - LSP, code complete (`cmp`), formatting (`conform`), debugging (`dap`), git tools, file explorer (`oil`)
-- Linux nvim and macOS nvim share the exact same nvim config.
+- Linux nvim and macOS nvim share the exact same nvim config (lives under `common/env/.config/nvim/` and is deployed to both platforms).
 
 ## Platform differences — macOS-specific setup files to check
 
