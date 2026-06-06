@@ -15,7 +15,7 @@ if ! tmux list-windows -F '#W' 2>/dev/null | grep -q '^scratch$'; then
     tmux new-window -dn scratch
 fi
 
-local cmd=$(tmux display-message -p '#{pane_current_command}')
+cmd=$(tmux display-message -p '#{pane_current_command}')
 if [[ $cmd != "vim" && $cmd != "nvim" ]]; then
     vim .
 fi
