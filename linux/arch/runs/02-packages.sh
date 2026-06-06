@@ -53,7 +53,6 @@ PACKAGES=(
     # Qt/GTK Theming
     qt5ct
     qt6ct
-    kvantum
     gtk3
     gtk4
 

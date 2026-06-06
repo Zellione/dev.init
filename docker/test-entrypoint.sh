@@ -161,8 +161,6 @@ check_bin  "Neovim"         "nvim"
 # Theming
 check_bin  "qt5ct"          "qt5ct"
 check_bin  "qt6ct"          "qt6ct"
-check_bin  "kvantummanager" "kvantummanager"
-
 # AUR packages
 check_bin  "wallust"        "wallust"
 check_bin  "paru"           "paru"

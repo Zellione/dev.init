@@ -12,7 +12,6 @@ PACKAGES=(
     wallust
     wlogout
     tokyonight-gtk-theme-git
-    kvantum-theme-catppuccin-git
     bibata-cursor-theme
 )
 
