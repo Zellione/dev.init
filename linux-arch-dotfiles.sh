@@ -24,6 +24,13 @@ deploy_dotfiles() {
     update_files "$env_base/arch/env/.config" "$XDG_CONFIG_HOME"
     update_files "$env_base/arch/env/.local"  "$HOME/.local"
 
+    if [[ "${DRY_RUN:-0}" == "0" ]]; then
+        systemctl --user daemon-reload 2>/dev/null || true
+        systemctl --user enable hypridle.service 2>/dev/null || true
+    else
+        log "[DRY_RUN]: would run systemctl --user daemon-reload && systemctl --user enable hypridle.service"
+    fi
+
     deploy_file "$env_base/common/env/.claude/settings.json" "$HOME/.claude/settings.json"
     deploy_file "$env_base/common/env/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
 
@@ -32,7 +39,7 @@ deploy_dotfiles() {
     if [[ -f "$_wallust_script" ]]; then
         if [[ "${DRY_RUN:-0}" == "0" ]]; then
             log "regenerating wallust colors..."
-            "$_wallust_script"
+            "$_wallust_script" > /dev/null 2>&1
         else
             log "[DRY_RUN]: would regenerate wallust colors via ${_wallust_script}"
         fi

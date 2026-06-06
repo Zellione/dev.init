@@ -6,6 +6,8 @@ switch_to() {
     else
         tmux switch-client -t $1
     fi
+    local session_path=$(tmux display-message -p -t $1 '#{pane_current_path}')
+    hydrate $1 "$session_path"
 }
 
 has_session() {
@@ -13,6 +15,9 @@ has_session() {
 }
 
 hydrate() {
+    local pane_cmd=$(tmux display-message -p -t $1 '#{pane_current_command}')
+    [[ $pane_cmd == "vim" || $pane_cmd == "nvim" ]] && return
+
     if [ -f $2/.tmux-sessionizer ]; then
         tmux send-keys -t $1 "source $2/.tmux-sessionizer" c-M
     elif [ -f $HOME/.tmux-sessionizer ]; then
@@ -34,8 +39,9 @@ selected_name=$(basename "$selected" | tr . _)
 tmux_running=$(pgrep tmux)
 
 if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
-    tmux new-session -s $selected_name -c $selected
+    tmux new-session -ds $selected_name -c $selected
     hydrate $selected_name $selected
+    tmux attach-session -t $selected_name
     exit 0
 fi
 
