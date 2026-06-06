@@ -27,12 +27,34 @@ deploy_dotfiles() {
     deploy_file "$env_base/common/env/.claude/settings.json" "$HOME/.claude/settings.json"
     deploy_file "$env_base/common/env/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
 
-    # deploy_file "$env_base/env/.zsh_profile"     "$HOME/.zsh_profile"
-    # deploy_file "$env_base/env/.zshrc"            "$HOME/.zshrc"
-    # deploy_file "$env_base/env/.tmux-cht-command"  "$HOME/.tmux-cht-command"
-    # deploy_file "$env_base/env/.tmux-cht-languages" "$HOME/.tmux-sessionizer"
-    # deploy_file "$env_base/env/.tmux.conf"         "$HOME/.tmux.conf"
-    # deploy_file "$env_base/env/.tmux-sessionizer"  "$HOME/.tmux-sessionizer"
+    # Regenerate wallust colors for current wallpaper
+    _wallust_script="$HOME/.config/hypr/scripts/wallust_swww.sh"
+    if [[ -f "$_wallust_script" ]]; then
+        if [[ "${DRY_RUN:-0}" == "0" ]]; then
+            log "regenerating wallust colors..."
+            "$_wallust_script"
+        else
+            log "[DRY_RUN]: would regenerate wallust colors via ${_wallust_script}"
+        fi
+    fi
+    unset _wallust_script
+
+    # Reload Hyprland config to pick up new colors
+    if command -v hyprctl &>/dev/null; then
+        if [[ "${DRY_RUN:-0}" == "0" ]]; then
+            log "reloading Hyprland config..."
+            hyprctl reload
+        else
+            log "[DRY_RUN]: would reload Hyprland config"
+        fi
+    fi
+
+    deploy_file "$env_base/arch/env/.zsh_profile"     "$HOME/.zsh_profile"
+    deploy_file "$env_base/arch/env/.zshrc"            "$HOME/.zshrc"
+    deploy_file "$env_base/common/env/.tmux-cht-command"  "$HOME/.tmux-cht-command"
+    deploy_file "$env_base/common/env/.tmux-cht-languages" "$HOME/.tmux-sessionizer"
+    deploy_file "$env_base/common/env/.tmux.conf"         "$HOME/.tmux.conf"
+    deploy_file "$env_base/common/env/.tmux-sessionizer"  "$HOME/.tmux-sessionizer"
 
     log "dotfiles deployment complete."
 }

@@ -17,7 +17,6 @@ return {
 			"typescript",
 			"jsdoc",
 			"go",
-			"gomod",
 			"gosum",
 			"gotmpl",
 		},
@@ -25,9 +24,8 @@ return {
 		indent = { enable = true },
 	},
 	config = function(_, opts)
-		-- nvim-treesitter v1.0+ removed the `nvim-treesitter.configs` module.
-		-- Setup now lives on the top-level module.
 		require("nvim-treesitter").setup(opts)
+		vim.cmd("TSUpdate")
 
 		-- Register markdown_inline as an embedded language of markdown so
 		-- treesitter-context (and highlighting) follow it inside markdown files.
