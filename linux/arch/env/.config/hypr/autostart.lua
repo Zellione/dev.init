@@ -18,7 +18,7 @@ hl.on("hyprland.start", function()
 
     -- Systemd / dbus environment propagation
     hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP && && systemctl --user start hypridle.service")
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP && systemctl --user start hypridle.service")
 
     -- Status bar + tray applets
     hl.exec_cmd("waybar")

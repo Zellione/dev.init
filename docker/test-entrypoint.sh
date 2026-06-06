@@ -125,6 +125,29 @@ check_bin  "hyprctl"        "hyprctl"
 check_bin  "hyprlock"       "hyprlock"
 check_bin  "hypridle"       "hypridle"
 
+# ── Test 5b: Hyprland autostart.lua shell syntax ──────────────────
+info "Test 5b: Hyprland autostart.lua shell syntax"
+
+AUTOSTART="$HOME/.config/hypr/autostart.lua"
+if [ -f "$AUTOSTART" ]; then
+    SYNTAX_OK=1
+    while IFS= read -r cmd; do
+        cmd="${cmd#\"}"
+        cmd="${cmd%\"}"
+        if ! sh -n -c "$cmd" 2>/dev/null; then
+            fail "autostart.lua has invalid shell command: $cmd"
+            SYNTAX_OK=0
+        fi
+    done < <(grep -oE 'hl\.exec_cmd\("[^"]*"\)' "$AUTOSTART" \
+             | sed -E 's/^hl\.exec_cmd\("//; s/"\)$//')
+    if [ "$SYNTAX_OK" -eq 1 ]; then
+        pass "All autostart.lua shell commands parse cleanly"
+    fi
+else
+    fail "autostart.lua not found at $AUTOSTART"
+fi
+echo ""
+
 # Terminal + File Manager
 check_bin  "Kitty"          "kitty"
 check_bin  "Thunar"         "thunar"

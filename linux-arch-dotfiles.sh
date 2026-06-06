@@ -43,7 +43,9 @@ deploy_dotfiles() {
     if command -v hyprctl &>/dev/null; then
         if [[ "${DRY_RUN:-0}" == "0" ]]; then
             log "reloading Hyprland config..."
-            hyprctl reload
+            if ! hyprctl reload 2>/dev/null; then
+                log "warning: hyprctl reload failed (no running Hyprland instance?)"
+            fi
         else
             log "[DRY_RUN]: would reload Hyprland config"
         fi
