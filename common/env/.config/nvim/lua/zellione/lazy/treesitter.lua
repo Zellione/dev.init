@@ -24,8 +24,7 @@ return {
 		indent = { enable = true },
 	},
 	config = function(_, opts)
-		require("nvim-treesitter").setup(opts)
-		vim.cmd("TSUpdate")
+		require("nvim-treesitter.configs").setup(opts)
 
 		-- Register markdown_inline as an embedded language of markdown so
 		-- treesitter-context (and highlighting) follow it inside markdown files.

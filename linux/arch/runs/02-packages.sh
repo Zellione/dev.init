@@ -18,6 +18,7 @@ PACKAGES=(
 
     # Editor
     neovim
+    tree-sitter-cli
 
     # Status Bar + Menus + Lock
     waybar
