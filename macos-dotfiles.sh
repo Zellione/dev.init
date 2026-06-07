@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
-# Wrapper: set DEV_ENV, source dotfiles.sh library, call deploy_dotfiles().
+# Wrapper: set DEV_ENV, source lib/dotfiles.sh, call deploy_dotfiles().
 set -euo pipefail
 
 export DRY_RUN=0
-for _arg in "$@"; do
-    if [[ "$_arg" == "--dry" ]]; then DRY_RUN=1; fi
+TAGS_FILTER=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --dry) DRY_RUN=1 ;;
+        --tags=*) TAGS_FILTER="${1#--tags=}" ;;
+        --tags) TAGS_FILTER="$2"; shift ;;
+    esac
+    shift
 done
-unset _arg
+export TAGS_FILTER
 
 export DEV_ENV="$(cd "$(dirname "$0")" && pwd)/macos"
-source "$(dirname "$0")/dotfiles.sh"
+source "$(dirname "$0")/lib/dotfiles.sh"
 
 deploy_dotfiles() {
     setup_xdg

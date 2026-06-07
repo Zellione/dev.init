@@ -10,6 +10,8 @@ if [ -z "${DEV_ENV:-}" ]; then
     return 1 2>/dev/null || exit 1
 fi
 
+source "$(dirname "${BASH_SOURCE[0]}")/tags.sh"
+
 export DRY_RUN="${DRY_RUN:-0}"
 
 log() {
@@ -33,7 +35,7 @@ run_scripts() {
         return 0
     fi
 
-    local scripts=() i="" s="" local_basename=""
+    local scripts=() i="" s="" local_basename="" item_tags=""
     if [[ "${DEV_ENV}" == *"macos"* ]]; then
         mapfile -t scripts < <(find "$scripts_dir" -mindepth 1 -maxdepth 1 -type f -executable | sort)
     else
@@ -50,15 +52,22 @@ run_scripts() {
         if [[ -n "$grep_pattern" ]]; then
             local_basename=$(basename "$s")
             if echo "$local_basename" | grep -qi "$grep_pattern"; then
-                log "running script: $s"
-                if [[ "${DRY_RUN:-0}" == "0" ]]; then bash "$s"; fi
+                :
             else
                 log "filtered out (pattern '${grep_pattern}'): ${local_basename}"
+                continue
             fi
-        else
-            log "running script: $s"
-            if [[ "${DRY_RUN:-0}" == "0" ]]; then bash "$s"; fi
         fi
+
+        # Tag filter
+        item_tags=$(_read_item_tags "$s")
+        if ! _matches_tags "$item_tags"; then
+            log "filtered (tags: ${item_tags:-none}): $(basename "$s")"
+            continue
+        fi
+
+        log "running script: $s"
+        if [[ "${DRY_RUN:-0}" == "0" ]]; then bash "$s"; fi
     done
 
     log "run.sh complete."

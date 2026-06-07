@@ -65,6 +65,12 @@ PACKAGES=(
     python
     python-requests
 
+    # Docker + container management
+    docker
+    docker-buildx
+    docker-compose
+    lazydocker
+
     # Sound theme
     sound-theme-freedesktop
 

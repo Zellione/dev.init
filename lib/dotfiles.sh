@@ -10,6 +10,8 @@ if [ -z "${DEV_ENV:-}" ]; then
     return 1 2>/dev/null || exit 1
 fi
 
+source "$(dirname "${BASH_SOURCE[0]}")/tags.sh"
+
 # Colors
 RED=$'\e[31m'
 YELLOW=$'\e[33m'
@@ -39,9 +41,14 @@ update_files() {
     pushd "$src_dir" &>/dev/null || return 1
 
     echo ""
-    local configs c target
+    local configs c target item_tags
     configs=$(find . -mindepth 1 -maxdepth 1 -type d)
     for c in $configs; do
+        item_tags=$(_read_item_tags "./$c")
+        if ! _matches_tags "$item_tags"; then
+            log "   filtered (tags: ${item_tags:-none}): ${YELLOW}${c}${ENCOLOR}"
+            continue
+        fi
         target="$dest_dir/${c#./}"
         log "   syncing: ${YELLOW}${c}${ENCOLOR} -> ${target}"
         if [[ "${DRY_RUN:-0}" == "0" ]]; then
@@ -56,6 +63,13 @@ update_files() {
 deploy_file() {
     local src="$1"
     local dest="$2"
+
+    local item_tags
+    item_tags=$(_read_item_tags "$src")
+    if ! _matches_tags "$item_tags"; then
+        log "   filtered (tags: ${item_tags:-none}): ${YELLOW}${src}${ENCOLOR}"
+        return 0
+    fi
 
     if [[ -e "${src}" ]]; then
         log "removing: ${RED}${dest}${ENCOLOR}"

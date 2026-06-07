@@ -2,12 +2,13 @@
 
 ## Architecture overview
 
-Libraries define functions; wrappers set `DEV_ENV`, source the library, then call its main function.
+Libraries (`lib/`) define functions; root-level wrappers set `DEV_ENV`, source the library, then call its main function. Library files live in `lib/` so it's obvious they're not meant to be executed directly.
 
 | Library | Wrapper(s) | Main function called |
 |---|---|---|
-| `dotfiles.sh` | `macos-dotfiles.sh`, `linux-dotfiles.sh` | `deploy_dotfiles "$@"` |
-| `run.sh` | `macos-run.sh`, `linux-run.sh` | `run_scripts "<pattern>"` |
+| `lib/dotfiles.sh` | `macos-dotfiles.sh`, `linux-dotfiles.sh`, `linux-arch-dotfiles.sh` | `deploy_dotfiles "$@"` |
+| `lib/run.sh` | `macos-run.sh`, `linux-run.sh`, `linux-arch-run.sh` | `run_scripts "<pattern>"` |
+| `lib/tags.sh` | (sourced by both lib/dotfiles.sh and lib/run.sh) | tag matching helpers |
 
 Libraries have source guards — they refuse to run if executed directly. They only become useful when sourced by a wrapper.
 
@@ -18,9 +19,11 @@ Libraries have source guards — they refuse to run if executed directly. They o
 
 Exact commands:
 ```bash
-./macos-dotfiles.sh [--dry]     # deploy macOS configs
-./linux-dotfiles.sh [--dry]      # deploy Linux configs
-./macos-run.sh [--dry] [grep]    # run macOS setup scripts, filtered by grep pattern
+./macos-dotfiles.sh [--dry] [--tags tag1,tag2]     # deploy macOS configs
+./linux-dotfiles.sh [--dry] [--tags tag1,tag2]      # deploy Linux configs
+./linux-arch-dotfiles.sh [--dry] [--tags tag1,tag2] # deploy Arch-specific configs
+./macos-run.sh [--dry] [--tags tag1,tag2] [grep]    # run macOS setup scripts
+./linux-arch-run.sh [--dry] [--tags tag1,tag2]       # run Arch setup scripts
 
 # Or use absolute paths from anywhere in the repo:
 /home/zellione/dev\.init/macos-dotfiles.sh --dry
@@ -73,9 +76,16 @@ Config overrides and aliases live in `macos/env/.config/personal/`:
 
 **Always test Linux Arch script changes in the Docker container** — never run `linux-arch-dotfiles.sh` or `linux-arch-run.sh` directly on the host.
 
+Full integration test (installs packages, verifies configs):
 ```bash
-docker build -t devinit-arch -f docker/Dockerfile .
+docker buildx build -t devinit-arch -f docker/Dockerfile .
 docker run --rm devinit-arch
+```
+
+Tag filtering test (minimal container, dry-run only):
+```bash
+docker buildx build -t devinit-tags -f docker/Dockerfile.tags .
+docker run --rm devinit-tags
 ```
 
 Or use docker compose:
@@ -83,11 +93,43 @@ Or use docker compose:
 cd docker && docker compose run --rm test
 ```
 
-The container runs as `testuser` (non-root), tests both dry-run and real deploy, and verifies all expected config dirs exist under `$HOME/.config/`.
+The full container runs as `testuser` (non-root), tests both dry-run and real deploy, and verifies all expected config dirs exist under `$HOME/.config/`.
 
 After testing, clean up the build image:
 ```bash
-docker rmi devinit-arch
+docker rmi devinit-arch devinit-tags
+```
+
+## Tag filtering
+
+Config dirs, run scripts, and standalone files can be tagged to control what gets deployed/executed.
+
+### How tags work
+
+- **Config dir** (`env/.config/` subdirs): a `.tag` file inside the directory lists its tags
+- **Run script** (`runs/`): a sidecar `.tag` file or a `# TAGS:` header on line 3
+- **Standalone file** (deployed via `deploy_file`): a sidecar `.tag` file beside it
+
+Tag format: comma-separated, e.g. `hyprland,ui`.
+
+### CLI usage
+
+```bash
+./linux-arch-dotfiles.sh --dry --tags hyprland        # only hyprland items
+./linux-arch-dotfiles.sh --dry --tags hyprland,screenshot  # OR matching
+./linux-arch-dotfiles.sh --dry                         # everything (backward compat)
+```
+
+- No `--tags` → everything deploys/runs (backward compatible)
+- `--tags hyprland` → only items tagged `hyprland`
+- `--tags hyprland,screenshot` → items matching **any** tag (OR logic)
+
+### Adding a .tag file
+
+```bash
+echo "hyprland,ui" > linux/arch/env/.config/waybar/.tag
+echo "packages" > linux/arch/runs/02-packages.sh.tag
+echo "shell" > linux/arch/env/.zshrc.tag
 ```
 
 ## Gotchas

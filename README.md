@@ -42,7 +42,7 @@ Test the Linux Arch scripts in an isolated Arch Linux container.
 ### Run tests
 
 ```bash
-docker build -t devinit-arch -f docker/Dockerfile .
+docker buildx build -t devinit-arch -f docker/Dockerfile .
 docker run --rm devinit-arch
 ```
 

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM archlinux:latest
 
 RUN pacman -Syu --noconfirm bash coreutils grep findutils git base-devel sudo
