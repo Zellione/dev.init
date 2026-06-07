@@ -54,8 +54,8 @@ qt5ct.target = '~/.config/qt5ct/colors/wallust.conf'
 qt6ct.template = 'colors-qt.conf'
 qt6ct.target = '~/.config/qt6ct/colors/wallust.conf'
 
-#swaync.template = 'colors-swaync.css'
-#swaync.target = '~/.config/swaync/wallust/colors-wallust.css'
+swaync.template = 'colors-swaync.css'
+swaync.target = '~/.config/swaync/wallust/colors-wallust.css'
 
 #macchina.template = 'colors-macchina.toml'
 #macchina.target = '~/.config/macchina/themes/wallust.toml'

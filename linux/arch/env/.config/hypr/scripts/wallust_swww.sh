@@ -27,10 +27,13 @@ if [ "$ln_success" = true ]; then
     echo 'about to execute wallust'
     wallust run "$wallpaper_path" -s
 
-    # regenerate waybar accent colors from new palette
+    # regenerate accent colors from new palette
     python3 "$HOME/.config/hypr/scripts/generate_waybar_accents.py"
     # restart waybar to reload CSS (SIGUSR1 only toggles visibility)
     killall waybar 2>/dev/null
+    # restart swaync to pick up new wallust colors
+    killall swaync 2>/dev/null
     sleep 0.3
     waybar > /dev/null 2>&1 &
+    swaync > /dev/null 2>&1 &
 fi

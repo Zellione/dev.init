@@ -14,6 +14,9 @@ from pathlib import Path
 WAYBAR_DIR = Path.home() / ".config" / "waybar"
 COLORS_CSS = WAYBAR_DIR / "wallust" / "colors-waybar.css"
 
+SWAYNC_DIR = Path.home() / ".config" / "swaync"
+SWAYNC_COLORS_CSS = SWAYNC_DIR / "wallust" / "colors-wallust.css"
+
 ACCENT_START = "/* wallust-accents-start */"
 ACCENT_END = "/* wallust-accents-end */"
 
@@ -121,8 +124,13 @@ def main():
 
     colors = parse_colors(COLORS_CSS)
     accent_block = generate_accent_css(colors)
+
     update_colors_css(COLORS_CSS, accent_block)
     print(f"Waybar accents regenerated in {COLORS_CSS}")
+
+    if SWAYNC_COLORS_CSS.parent.exists():
+        update_colors_css(SWAYNC_COLORS_CSS, accent_block)
+        print(f"Swaync accents regenerated in {SWAYNC_COLORS_CSS}")
 
 
 if __name__ == "__main__":
