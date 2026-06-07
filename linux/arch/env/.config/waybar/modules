@@ -302,14 +302,6 @@
         "format": "{}"
     },
 
-    "custom/keybinds": {
-        "format": "󰺁 HINT!",
-        "exec": "echo ; echo  Key Hints SUPER H",
-        "on-click": "~/.config/hypr/scripts/key_hints.sh",
-        "interval": 86400,
-        "tooltip": true
-    },
-
     "custom/keyboard": {
         "exec": "cat ~/.cache/kb_layout",
         "interval": 1,
@@ -338,13 +330,13 @@
         "tooltip": true,
         "format": "{icon} {text}",
         "format-icons": {
-            "notification": "<span foreground='red'><sup></sup></span>",
+            "notification": "<span foreground='red'><sup>●</sup></span>",
             "none": "",
-            "dnd-notification": "<span foreground='red'><sup></sup></span>",
+            "dnd-notification": "<span foreground='red'><sup>●</sup></span>",
             "dnd-none": "",
-            "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+            "inhibited-notification": "<span foreground='red'><sup>●</sup></span>",
             "inhibited-none": "",
-            "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+            "dnd-inhibited-notification": "<span foreground='red'><sup>●</sup></span>",
             "dnd-inhibited-none": ""
         },
         "return-type": "json",

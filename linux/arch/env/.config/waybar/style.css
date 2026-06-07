@@ -122,7 +122,6 @@ tooltip label {
 #wireplumber,
 #workspaces,
 #custom-cava_mviz,
-#custom-keybinds,
 #custom-keyboard,
 #custom-lock,
 #custom-power,
@@ -237,10 +236,6 @@ tooltip label {
 
 #custom-power {
     color: @accent-red;
-}
-
-#custom-keybinds {
-    color: @color8;
 }
 
 #custom-weather {
