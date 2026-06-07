@@ -27,11 +27,11 @@ deploy_dotfiles() {
 
     update_files "./common/env/.config"  "$XDG_CONFIG_HOME"
     update_files "$env_base/common/env/.config" "$XDG_CONFIG_HOME"
-    update_files "$env_base/common/env/.local"  "$HOME/.local"
+    update_files "$env_base/common/env/.local"  "$HOME/.local" "add-only"
 
     # Arch-specific — Hyprland ecosystem
     update_files "$env_base/arch/env/.config" "$XDG_CONFIG_HOME"
-    update_files "$env_base/arch/env/.local"  "$HOME/.local"
+    update_files "$env_base/arch/env/.local"  "$HOME/.local" "add-only"
 
     if [[ "${DRY_RUN:-0}" == "0" ]]; then
         systemctl --user daemon-reload 2>/dev/null || true

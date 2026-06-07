@@ -36,6 +36,7 @@ setup_xdg() {
 update_files() {
     local src_dir="$1"
     local dest_dir="${2%/}"
+    local sync_mode="${3:-delete}"
 
     log "syncing files from: ${src_dir}"
     pushd "$src_dir" &>/dev/null || return 1
@@ -53,7 +54,11 @@ update_files() {
         log "   syncing: ${YELLOW}${c}${ENCOLOR} -> ${target}"
         if [[ "${DRY_RUN:-0}" == "0" ]]; then
             mkdir -p "$target"
-            rsync -a --delete "./$c/" "$target/"
+            if [[ "$sync_mode" == "add-only" ]]; then
+                rsync -a "./$c/" "$target/"
+            else
+                rsync -a --delete "./$c/" "$target/"
+            fi
         fi
     done
     echo ""
