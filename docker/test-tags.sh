@@ -108,6 +108,63 @@ else
 fi
 echo ""
 
+# ── Test 7: --exclude filters out tagged items ─────────────────────
+info "Test 7: --dry --exclude ui excludes ui-tagged dirs"
+OUTPUT=$(bash "$WRAPPER" --dry --exclude ui 2>&1 | strip_ansi)
+if echo "$OUTPUT" | grep -qF "./rofi "; then
+    fail "rofi should NOT be included (tagged ui, --exclude ui)"
+else
+    pass "rofi correctly excluded (--exclude ui)"
+fi
+if echo "$OUTPUT" | grep -qF "./swaync "; then
+    fail "swaync should NOT be included (tagged ui, --exclude ui)"
+else
+    pass "swaync correctly excluded (--exclude ui)"
+fi
+if echo "$OUTPUT" | grep -qF "./hypr "; then
+    pass "hypr still included (not tagged ui)"
+else
+    fail "hypr should still be included (not tagged ui)"
+fi
+echo ""
+
+# ── Test 8: --tags + --exclude combined ───────────────────────────
+info "Test 8: --dry --tags hyprland --exclude wallust"
+OUTPUT=$(bash "$WRAPPER" --dry --tags hyprland --exclude wallust 2>&1 | strip_ansi)
+for dir in hypr waybar wlogout; do
+    if echo "$OUTPUT" | grep -qF "./$dir "; then
+        pass "$dir included with --tags hyprland --exclude wallust"
+    else
+        fail "$dir should be included"
+    fi
+done
+if echo "$OUTPUT" | grep -qF "./wallust "; then
+    fail "wallust should NOT be included (excluded)"
+else
+    pass "wallust correctly excluded by --exclude wallust"
+fi
+echo ""
+
+# ── Test 9: --exclude multi-tag on files ──────────────────────────
+info "Test 9: --dry --exclude shell,tmux excludes shell and tmux files"
+OUTPUT=$(bash "$WRAPPER" --dry --exclude shell,tmux 2>&1 | strip_ansi)
+if echo "$OUTPUT" | grep -q "copying:.*\.zshrc"; then
+    fail ".zshrc should NOT be included (tagged shell, --exclude shell)"
+else
+    pass ".zshrc correctly excluded (--exclude shell)"
+fi
+if echo "$OUTPUT" | grep -q "copying:.*\.tmux.conf"; then
+    fail ".tmux.conf should NOT be included (tagged tmux, --exclude tmux)"
+else
+    pass ".tmux.conf correctly excluded (--exclude tmux)"
+fi
+if echo "$OUTPUT" | grep -q "copying:.*settings.json"; then
+    pass "claude settings.json still included (tagged editor,ai, not excluded)"
+else
+    fail "claude settings.json should still be included (not excluded)"
+fi
+echo ""
+
 # ── Summary ──────────────────────────────────────────────────────
 echo "========================================="
 if [ "$FAILURES" -eq 0 ]; then

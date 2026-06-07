@@ -115,14 +115,18 @@ Tag format: comma-separated, e.g. `hyprland,ui`.
 ### CLI usage
 
 ```bash
-./linux-arch-dotfiles.sh --dry --tags hyprland        # only hyprland items
-./linux-arch-dotfiles.sh --dry --tags hyprland,screenshot  # OR matching
-./linux-arch-dotfiles.sh --dry                         # everything (backward compat)
+./linux-arch-dotfiles.sh --dry --tags hyprland                  # only hyprland items
+./linux-arch-dotfiles.sh --dry --tags hyprland,screenshot            # OR matching
+./linux-arch-dotfiles.sh --dry --exclude ui                           # everything except ui
+./linux-arch-dotfiles.sh --dry --tags hyprland --exclude wallust     # hyprland minus wallust
+./linux-arch-dotfiles.sh --dry                                        # everything (backward compat)
 ```
 
 - No `--tags` → everything deploys/runs (backward compatible)
 - `--tags hyprland` → only items tagged `hyprland`
 - `--tags hyprland,screenshot` → items matching **any** tag (OR logic)
+- `--exclude ui` → exclude items tagged `ui` (applied after include filter)
+- `--tags hyprland --exclude wallust` → include hyprland items, but exclude wallust
 
 ### Adding a .tag file
 
