@@ -45,7 +45,7 @@ fi
 
 if ! has_session $selected_name; then
     tmux new-session -ds $selected_name -c $selected
+    hydrate $selected_name $selected
 fi
 
-hydrate $selected_name $selected
 switch_to $selected_name
