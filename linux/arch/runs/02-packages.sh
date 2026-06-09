@@ -23,7 +23,6 @@ PACKAGES=(
 
     # Status Bar + Menus + Lock
     waybar
-    rofi
     yad
     swaync
     libnotify

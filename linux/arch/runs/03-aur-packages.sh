@@ -13,6 +13,7 @@ PACKAGES=(
     wlogout
     tokyonight-gtk-theme-git
     bibata-cursor-theme
+    rofi-lbonn-wayland-git
 )
 
 echo "Installing AUR packages..."
