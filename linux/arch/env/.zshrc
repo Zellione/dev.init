@@ -100,23 +100,7 @@ source ~/.zsh_profile
 alias ll="ls -ltra"
 alias gd="git diff"
 alias gcmsg="git commit -m"
-# alias gitc="git checkout"
-# alias gitm="git checkout master"
-# alias ghce="gh copilot explain"
-# alias ghcs="gh copilot suggest"
-
-### From this line is for pywal-colors
-# Import colorscheme from 'wal' asynchronously
-# &   # Run the process in the background.
-# ( ) # Hide shell job control messages.
-# Not supported in the "fish" shell.
-#(cat ~/.cache/wal/sequences &)
-
-# Alternative (blocks terminal for 0-3ms)
-#cat ~/.cache/wal/sequences
-
-# To add support for TTYs this line can be optionally added.
-#source ~/.cache/wal/colors-tty.sh
+alias gitc="git checkout"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -127,18 +111,11 @@ alias luamake=/home/zellione/personal/sumneko/3rd/luamake/luamake
 # Generated for envman. Do not edit.
 [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-# [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-
 # Load Angular CLI autocompletion.
 source <(ng completion script)
 
 # Load fzf Git completion
 source ~/tools/fzf-git.sh.git/fzf-git.sh
-
-export PATH="/home/zellione/.config/herd-lite/bin:$PATH"
-export PHP_INI_SCAN_DIR="/home/zellione/.config/herd-lite/bin:$PHP_INI_SCAN_DIR"
 
 # Add local binaries to path
 export PATH="$HOME/.local/bin:$PATH"
