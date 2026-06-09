@@ -17,6 +17,6 @@ while [[ $# -gt 0 ]]; do
 done
 export TAGS_FILTER TAGS_EXCLUDE
 
-export DEV_ENV="$(cd "$(dirname "$0")" && pwd)/linux"
+export DEV_ENV="$(cd "$(dirname "$0")" && pwd)/linux/arch"
 source "$(dirname "$0")/lib/run.sh"
 run_scripts ""

@@ -39,7 +39,7 @@ run_scripts() {
     if [[ "${DEV_ENV}" == *"macos"* ]]; then
         mapfile -t scripts < <(find "$scripts_dir" -mindepth 1 -maxdepth 1 -type f -executable | sort)
     else
-        mapfile -t scripts < <(find "$scripts_dir" -mindepth 1 -maxdepth 1 -type f \( -executable -o -perm +111 \) | sort)
+        mapfile -t scripts < <(find "$scripts_dir" -mindepth 1 -maxdepth 1 -type f \( -executable -o -perm /111 \) | sort)
     fi
 
     if [[ ${#scripts[@]} -eq 0 ]]; then
