@@ -55,10 +55,11 @@ update_files() {
         if [[ "${DRY_RUN:-0}" == "0" ]]; then
             mkdir -p "$target"
             if [[ "$sync_mode" == "add-only" ]]; then
-                rsync -a "./$c/" "$target/"
+                rsync -a --exclude='.tag' "./$c/" "$target/"
             else
-                rsync -a --delete "./$c/" "$target/"
+                rsync -a --delete --exclude='.tag' "./$c/" "$target/"
             fi
+            find "$target" -name '.tag' -type f -delete 2>/dev/null
         fi
     done
     echo ""
