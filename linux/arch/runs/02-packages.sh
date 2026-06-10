@@ -64,6 +64,7 @@ PACKAGES=(
     # Python
     python
     python-requests
+    uv
 
     # Docker + container management
     docker
