@@ -40,7 +40,7 @@ deploy_dotfiles() {
         log "[DRY_RUN]: would run systemctl --user daemon-reload && systemctl --user enable hypridle.service"
     fi
 
-    deploy_file "$env_base/common/env/.claude/settings.json" "$HOME/.claude/settings.json"
+    deploy_file "$env_base/arch/env/.claude/settings.json" "$HOME/.claude/settings.json"
     deploy_file "$env_base/common/env/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
 
     # Regenerate wallust colors for current wallpaper
