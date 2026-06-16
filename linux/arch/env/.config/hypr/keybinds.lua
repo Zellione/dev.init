@@ -82,6 +82,8 @@ hl.bind("XF86AudioPlay",         hl.dsp.exec_cmd(scriptsDir .. "/media_ctrl.sh -
 hl.bind("XF86AudioNext",         hl.dsp.exec_cmd(scriptsDir .. "/media_ctrl.sh --nxt"))
 hl.bind("XF86AudioPrev",         hl.dsp.exec_cmd(scriptsDir .. "/media_ctrl.sh --prv"))
 hl.bind("XF86AudioStop",         hl.dsp.exec_cmd(scriptsDir .. "/media_ctrl.sh --stop"))
+hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd(scriptsDir .. "/brightness.sh --inc"))
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd(scriptsDir .. "/brightness.sh --dec"))
 
 -- ---- Screenshots -------------------------------------------
 
