@@ -154,3 +154,5 @@ export COLORTERM=truecolor
 # LSP tooling paths
 export PATH=$PATH:$HOME/.local/go/bin:$HOME/go/bin:$HOME/.cargo/bin
 source "$HOME/.cargo/env" 2>/dev/null || true
+export VCPKG_ROOT=/home/zellione/tools/vcpkg
+export PKG_CONFIG_LIBDIR=/usr/lib/pkgconfig
