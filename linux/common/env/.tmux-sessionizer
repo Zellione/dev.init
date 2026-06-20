@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# i do this to every directory i am in
+# 1 is neovim
+# 2 is where i run commands
+#
+# could be cool!!
+# this means i could create a neovim plugin to shoot commands out to "scratch"
+if [[ "$(pwd)" == $HOME/personal ]]; then
+    clear
+    return
+fi
+
+if ! tmux list-windows -F '#W' 2>/dev/null | grep -q '^scratch$'; then
+    tmux new-window -dn scratch
+fi
+
+cmd=$(tmux display-message -p '#{pane_current_command}')
+if [[ $cmd != "vim" && $cmd != "nvim" ]]; then
+    vim .
+fi
+
+clear

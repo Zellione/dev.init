@@ -17,6 +17,7 @@ M.setup = function()
 		{ lsp = "gopls",                mason = "gopls" },
 		{ lsp = "jdtls",                mason = "jdtls" },
 		{ lsp = "robotcode",            mason = "robotcode" },
+		{ lsp = "bashls",               mason = "bash-language-server" },
 	}
 
 	local mason_packages = vim.tbl_map(function(s)

@@ -1,0 +1,21 @@
+#!/usr/bin/env zsh
+systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP 2>/dev/null
+
+systemctl --user start hyprland.service
+
+HYPRLAND_DIR=/run/user/$UID/hypr
+for i in {1..30}; do
+    for dir in "$HYPRLAND_DIR"/*/; do
+        if [[ -f "${dir}hyprland.lock" && -S "${dir}.socket.sock" ]]; then
+            sig=${dir%/}
+            sig=${sig##*/}
+            systemctl --user set-environment "HYPRLAND_INSTANCE_SIGNATURE=$sig"
+            break 2
+        fi
+    done
+    sleep 0.5
+done
+
+while systemctl --user is-active hyprland.service >/dev/null 2>&1; do
+    sleep 1
+done

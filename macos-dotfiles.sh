@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
-# Wrapper: set DEV_ENV, source dotfiles.sh library, call deploy_dotfiles().
+# Wrapper: set DEV_ENV, source lib/dotfiles.sh, call deploy_dotfiles().
 set -euo pipefail
 
 export DRY_RUN=0
-for _arg in "$@"; do
-    if [[ "$_arg" == "--dry" ]]; then DRY_RUN=1; fi
+TAGS_FILTER=""
+TAGS_EXCLUDE=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --dry) DRY_RUN=1 ;;
+        --tags=*) TAGS_FILTER="${1#--tags=}" ;;
+        --tags) TAGS_FILTER="$2"; shift ;;
+        --exclude=*) TAGS_EXCLUDE="${1#--exclude=}" ;;
+        --exclude) TAGS_EXCLUDE="$2"; shift ;;
+    esac
+    shift
 done
-unset _arg
+export TAGS_FILTER TAGS_EXCLUDE
 
 export DEV_ENV="$(cd "$(dirname "$0")" && pwd)/macos"
-source "$(dirname "$0")/dotfiles.sh"
+source "$(dirname "$0")/lib/dotfiles.sh"
 
 deploy_dotfiles() {
     setup_xdg
@@ -18,7 +27,7 @@ deploy_dotfiles() {
 
     update_files "./common/env/.config"  "$XDG_CONFIG_HOME"
     update_files "$env_base/env/.config" "$XDG_CONFIG_HOME"
-    update_files "$env_base/env/.local"  "$HOME/.local"
+    update_files "$env_base/env/.local"  "$HOME/.local" "add-only"
 
     deploy_file "$env_base/env/.zsh_profile"     "$HOME/.zsh_profile"
     deploy_file "$env_base/env/.zshrc"            "$HOME/.zshrc"

@@ -1,0 +1,361 @@
+@import "wallust/colors-wallust.css";
+
+* {
+    font-family: FiraCode;
+    font-weight: bold;
+}
+
+/* ---- Notification list ---- */
+
+.control-center .notification-row:focus,
+.control-center .notification-row:hover {
+    background: transparent;
+    opacity: 1;
+}
+
+.notification-row {
+    outline: none;
+    margin: 0;
+    padding: 0;
+}
+
+.notification {
+    border-radius: 14px;
+    margin: 2px 8px;
+}
+
+.notification-content {
+    background: @background;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1px solid @border;
+    margin: 4px;
+}
+
+.notification-default-action {
+    margin: 4px;
+    padding: 0;
+    border-radius: 14px;
+    transition: background 0.2s ease;
+}
+
+.notification-default-action:hover {
+    background: alpha(@border, 0.25);
+}
+
+.notification-default-action:not(:only-child) {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Close button */
+.close-button {
+    background: @accent-pink;
+    color: @background;
+    text-shadow: none;
+    padding: 2px 8px;
+    border-radius: 14px;
+    margin-top: 8px;
+    margin-right: 8px;
+    transition: all 0.2s ease;
+}
+
+.close-button:hover {
+    background: @accent-red;
+    box-shadow: none;
+    border: none;
+}
+
+/* Notification actions */
+.notification-action {
+    border: 1px solid @border;
+    border-top: none;
+    border-radius: 14px;
+    background: @background-alt;
+}
+
+.notification-action:first-child {
+    border-bottom-left-radius: 14px;
+}
+
+.notification-action:last-child {
+    border-bottom-right-radius: 14px;
+}
+
+/* Inline reply */
+.inline-reply {
+    margin-top: 8px;
+}
+
+.inline-reply-entry {
+    background: @background-alt;
+    color: @foreground;
+    caret-color: @foreground;
+    border: 1px solid @border;
+    border-radius: 14px;
+}
+
+.inline-reply-button {
+    font-size: 0.5rem;
+    margin-left: 4px;
+    background: @background-alt;
+    border: 1px solid @border;
+    border-radius: 14px;
+    color: @foreground;
+}
+
+.inline-reply-button:disabled {
+    background: initial;
+    color: @border;
+    border: 1px solid transparent;
+}
+
+.inline-reply-button:hover {
+    background: @accent-pink;
+    color: @background;
+}
+
+/* Body image */
+.body-image {
+    margin-top: 8px;
+    border-radius: 14px;
+}
+
+/* Notification text */
+.summary {
+    font-size: 1rem;
+    font-weight: bold;
+    background: transparent;
+    color: @foreground;
+    text-shadow: none;
+}
+
+.time {
+    font-size: 0.85rem;
+    font-weight: normal;
+    background: transparent;
+    color: @text-secondary;
+    text-shadow: none;
+    margin-right: 18px;
+}
+
+.body {
+    font-size: 0.95rem;
+    font-weight: normal;
+    background: transparent;
+    color: @foreground;
+    text-shadow: none;
+}
+
+/* ---- Control Center ---- */
+
+.control-center {
+    background: @background;
+    border: 1px solid @border;
+    color: @foreground;
+    border-radius: 14px;
+}
+
+.control-center-list {
+    background: transparent;
+}
+
+.control-center-list-placeholder {
+    opacity: 0.5;
+}
+
+.floating-notifications {
+    background: transparent;
+}
+
+.blank-window {
+    background: alpha(black, 0.1);
+}
+
+/* Widgets */
+.widget-title {
+    color: @foreground;
+    background: @background-alt;
+    padding: 6px 12px;
+    margin: 6px 10px;
+    font-size: 1rem;
+    border-radius: 14px;
+}
+
+.widget-title > button {
+    font-size: 0.85rem;
+    color: @foreground;
+    border-radius: 14px;
+    background: transparent;
+    border: 1px solid @border;
+    padding: 2px 10px;
+    transition: all 0.2s ease;
+}
+
+.widget-title > button:hover {
+    background: @accent-pink;
+    color: @background;
+    border-color: @accent-pink;
+}
+
+.widget-dnd {
+    background: @background-alt;
+    padding: 6px 12px;
+    margin: 6px 10px;
+    border-radius: 14px;
+    font-size: 1rem;
+    color: @foreground;
+}
+
+.widget-dnd > switch {
+    border-radius: 14px;
+    background: @border;
+    transition: background 0.2s ease;
+}
+
+.widget-dnd > switch:checked {
+    background: @accent-green;
+    border: none;
+}
+
+.widget-dnd > switch slider {
+    background: @background-alt;
+    border-radius: 14px;
+}
+
+.widget-dnd > switch:checked slider {
+    background: @background;
+    border-radius: 14px;
+}
+
+/* Label widget */
+.widget-label {
+    margin: 6px;
+}
+
+.widget-label > label {
+    font-size: 1rem;
+    color: @foreground;
+}
+
+/* MPRIS widget */
+.widget-mpris {
+    color: @foreground;
+    background: @background-alt;
+    padding: 6px 12px;
+    margin: 6px 10px;
+    border-radius: 14px;
+}
+
+.widget-mpris > box > button {
+    border-radius: 14px;
+    transition: all 0.2s ease;
+}
+
+.widget-mpris-player {
+    padding: 4px 8px;
+    margin: 4px;
+}
+
+.widget-mpris-title {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.widget-mpris-subtitle {
+    font-size: 0.8rem;
+    color: @text-secondary;
+}
+
+/* Buttons grid */
+.widget-buttons-grid {
+    font-size: large;
+    color: @foreground;
+    padding: 6px;
+    margin: 6px 10px;
+    border-radius: 14px;
+    background: @background-alt;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button {
+    margin: 2px;
+    background: @background;
+    border-radius: 14px;
+    color: @foreground;
+    padding: 6px;
+    transition: all 0.2s ease, background 0.2s ease;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button:hover {
+    background: @accent-pink;
+    color: @background;
+}
+
+/* Menu bar */
+.widget-menubar > box > .menu-button-bar > button {
+    border: none;
+    background: transparent;
+}
+
+.topbar-buttons > button {
+    border: none;
+    background: transparent;
+}
+
+/* Volume widget */
+.widget-volume {
+    background: @background-alt;
+    padding: 6px 12px;
+    margin: 8px 10px;
+    border-radius: 14px;
+    font-size: x-large;
+    color: @foreground;
+}
+
+.widget-volume > box > button {
+    background: @accent-purple;
+    border: none;
+    border-radius: 14px;
+    transition: all 0.2s ease;
+}
+
+.widget-volume > box > button:hover {
+    background: @accent-pink;
+}
+
+.per-app-volume {
+    background-color: @background;
+    padding: 6px 12px;
+    margin: 0 8px 8px;
+    border-radius: 14px;
+    color: @foreground;
+}
+
+/* Backlight widget */
+.widget-backlight {
+    background: @background-alt;
+    padding: 6px 12px;
+    margin: 8px 10px;
+    border-radius: 14px;
+    font-size: x-large;
+    color: @foreground;
+}
+
+/* Progress bar levels */
+.low {
+    background: @accent-green;
+    padding: 0;
+    border-radius: 14px;
+}
+
+.normal {
+    background: @accent-yellow;
+    padding: 0;
+    border-radius: 14px;
+}
+
+.critical {
+    background: @accent-red;
+    padding: 0;
+    border-radius: 14px;
+}
