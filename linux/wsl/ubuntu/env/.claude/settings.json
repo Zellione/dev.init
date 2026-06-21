@@ -1,8 +1,8 @@
 {
   "env": {
-    "MAX_THINKING_TOKENS": "10000",
-    "CLAUDE_MAX_CONTEXT_WINDOW": "200000",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50",
+    "MAX_THINKING_TOKENS": "20000",
+    "CLAUDE_MAX_CONTEXT_WINDOW": "400000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60",
     "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
     "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"
   },
@@ -21,6 +21,15 @@
             "command": "wsl-screenshot-cli start --daemon --quiet 2>/dev/null"
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": \"MANDATORY: Before starting any coding task, call mcp__serena__initial_instructions FIRST. Then load Serena tools via ToolSearch before reading or editing any code files. This is a hard requirement.\"}}' 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "Stop": [
@@ -30,6 +39,15 @@
           {
             "type": "command",
             "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Done!\" &'"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); echo \"$input\" | jq -e '.stop_hook_active == true' >/dev/null 2>&1 && exit 0; echo '{\"hookSpecificOutput\": {\"hookEventName\": \"Stop\", \"additionalContext\": \"Before finishing: if you introduced new conventions, patterns, services, or structural changes to the codebase this turn, update the relevant Serena memory (mem:core, mem:conventions, mem:tech_stack, or mem:task_completion) using mcp__serena__write_memory.\"}}'"
           }
         ]
       }
@@ -59,7 +77,9 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bash ~/.claude/statusline-command.sh"
+    "command": "ccstatusline",
+    "padding": 0,
+    "refreshInterval": 10
   },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
@@ -82,7 +102,8 @@
     "huggingface-skills@claude-plugins-official": true,
     "clangd-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "session-report@claude-plugins-official": true
   },
   "theme": "dark"
 }
