@@ -26,3 +26,5 @@ addToPathFront /home/zellione/go/bin
 
 tmux=$(which tmux)
 alias tmux="$tmux -2"
+
+export VCPKG_ROOT=/home/zellione/tools/vcpkg
