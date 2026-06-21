@@ -1,20 +1,20 @@
 services:
-  test:
+  test-arch:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.arch
     container_name: devinit-arch-test
     volumes:
       - ..:/workspace
     environment:
       DOCKER_BUILDKIT: 1
       COMPOSE_DOCKER_CLI_BUILD: 1
-    entrypoint: ["bash", "docker/test-entrypoint.sh"]
+    entrypoint: ["bash", "docker/test-entrypoint-arch.sh"]
 
-  shell:
+  shell-arch:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.arch
     container_name: devinit-arch-shell
     volumes:
       - ..:/workspace
@@ -24,3 +24,47 @@ services:
     entrypoint: ["bash"]
     stdin_open: true
     tty: true
+
+  test-arch-tags:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.arch-tags
+    container_name: devinit-arch-tags
+    volumes:
+      - ..:/workspace
+    entrypoint: ["bash", "docker/test-tags-arch.sh"]
+
+  test-ubuntu:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ubuntu-wsl
+    container_name: devinit-ubuntu-test
+    volumes:
+      - ..:/workspace
+    environment:
+      DOCKER_BUILDKIT: 1
+      COMPOSE_DOCKER_CLI_BUILD: 1
+    entrypoint: ["bash", "docker/test-entrypoint-ubuntu-wsl.sh"]
+
+  shell-ubuntu:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ubuntu-wsl
+    container_name: devinit-ubuntu-shell
+    volumes:
+      - ..:/workspace
+    environment:
+      DOCKER_BUILDKIT: 1
+      COMPOSE_DOCKER_CLI_BUILD: 1
+    entrypoint: ["bash"]
+    stdin_open: true
+    tty: true
+
+  test-ubuntu-tags:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ubuntu-wsl-tags
+    container_name: devinit-ubuntu-tags
+    volumes:
+      - ..:/workspace
+    entrypoint: ["bash", "docker/test-tags-ubuntu-wsl.sh"]

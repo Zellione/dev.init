@@ -7,4 +7,4 @@ COPY . /workspace/
 RUN chmod -R a+rX /workspace
 
 WORKDIR /workspace
-ENTRYPOINT ["bash", "docker/test-tags.sh"]
+ENTRYPOINT ["bash", "docker/test-tags-arch.sh"]

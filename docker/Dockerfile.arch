@@ -27,4 +27,4 @@ RUN chown -R testuser:testuser /workspace
 USER testuser
 WORKDIR /workspace
 
-ENTRYPOINT ["bash", "docker/test-entrypoint.sh"]
+ENTRYPOINT ["bash", "docker/test-entrypoint-arch.sh"]
