@@ -21,6 +21,7 @@ PACKAGES=(
     python3
     rsync
     jq
+    tealdeer
 )
 
 echo "Installing apt packages..."

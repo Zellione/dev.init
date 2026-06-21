@@ -22,6 +22,9 @@ PACKAGES=(
     neovim
     tree-sitter-cli
 
+    # Productivity
+    tldr
+
     # Status Bar + Menus + Lock
     waybar
     yad
