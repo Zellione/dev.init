@@ -36,11 +36,12 @@ deploy_dotfiles() {
     deploy_file "$env_base/common/env/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
 
 
-    deploy_file "$env_base/wsl/ubuntu/env/.zshrc"            "$HOME/.zshrc"
-    deploy_file "$env_base/common/env/.tmux-cht-command"  "$HOME/.tmux-cht-command"
+    deploy_file "$env_base/wsl/ubuntu/env/.zshrc"          "$HOME/.zshrc"
+    deploy_file "$env_base/wsl/ubuntu/env/.zsh_profile"  "$HOME/.zsh_profile"
+    deploy_file "$env_base/common/env/.tmux-cht-command"   "$HOME/.tmux-cht-command"
     deploy_file "$env_base/common/env/.tmux-cht-languages" "$HOME/.tmux-cht-languages"
-    deploy_file "$env_base/common/env/.tmux.conf"         "$HOME/.tmux.conf"
-    deploy_file "$env_base/common/env/.tmux-sessionizer"  "$HOME/.tmux-sessionizer"
+    deploy_file "$env_base/common/env/.tmux.conf"          "$HOME/.tmux.conf"
+    deploy_file "$env_base/common/env/.tmux-sessionizer"   "$HOME/.tmux-sessionizer"
 
     log "dotfiles deployment complete."
 }

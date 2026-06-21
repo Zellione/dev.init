@@ -1,5 +1,6 @@
 export ZSH="$HOME/.oh-my-zsh"
 
+
 plugins=(
     git
     fzf
@@ -87,6 +88,7 @@ source $ZSH/oh-my-zsh.sh
 # Project page: https://gitlab.com/phoneybadger/pokemon-colorscripts#on-other-distros-and-macos
 #pokemon-colorscripts --no-title -s -r
 
+alias vim="nvim"
 alias ll="ls -la"
 alias gd="git diff"
 alias gcmsg="git commit -m"
