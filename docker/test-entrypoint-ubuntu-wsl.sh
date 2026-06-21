@@ -147,6 +147,9 @@ check_bin  "Npm"           "npm"
 # vcpkg
 check_bin  "vcpkg"         "vcpkg"
 
+# TPM
+check_dir  "TPM"           "$HOME/.tmux/plugins/tpm"
+
 # Fonts
 check_bin  "fc-list"       "fc-list"
 

@@ -19,7 +19,8 @@ else
     TEMP_DIR=$(mktemp -d)
     curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/JetBrainsMono.zip \
         -o "$TEMP_DIR/JetBrainsMono.zip"
-    unzip -o -q "$TEMP_DIR/JetBrainsMono.zip" -d /usr/share/fonts/truetype/jetbrains-mono
+    sudo mkdir -p /usr/share/fonts/truetype/jetbrains-mono
+    sudo unzip -o -q "$TEMP_DIR/JetBrainsMono.zip" -d /usr/share/fonts/truetype/jetbrains-mono
     fc-cache -f
     rm -rf "$TEMP_DIR"
     echo "JetBrains Mono installed."

@@ -70,7 +70,7 @@ deploy_dotfiles() {
     deploy_file "$env_base/arch/env/.zsh_profile"     "$HOME/.zsh_profile"
     deploy_file "$env_base/arch/env/.zshrc"            "$HOME/.zshrc"
     deploy_file "$env_base/common/env/.tmux-cht-command"  "$HOME/.tmux-cht-command"
-    deploy_file "$env_base/common/env/.tmux-cht-languages" "$HOME/.tmux-sessionizer"
+    deploy_file "$env_base/common/env/.tmux-cht-languages" "$HOME/.tmux-cht-languages"
     deploy_file "$env_base/common/env/.tmux.conf"         "$HOME/.tmux.conf"
     deploy_file "$env_base/common/env/.tmux-sessionizer"  "$HOME/.tmux-sessionizer"
 

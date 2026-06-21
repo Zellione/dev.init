@@ -15,6 +15,7 @@ PACKAGES=(
     # Terminal + File Manager
     kitty
     thunar
+    tmux
     yazi
 
     # Editor

@@ -20,6 +20,7 @@ RUN echo "testuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/testuser \
 USER testuser
 RUN bash /workspace/linux/arch/runs/01-aur.sh
 RUN bash /workspace/linux/arch/runs/03-aur-packages.sh
+RUN bash /workspace/linux/arch/runs/05-tpm.sh
 USER root
 
 RUN chown -R testuser:testuser /workspace

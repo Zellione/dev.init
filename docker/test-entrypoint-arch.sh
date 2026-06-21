@@ -188,6 +188,9 @@ check_bin  "qt6ct"          "qt6ct"
 check_bin  "wallust"        "wallust"
 check_bin  "paru"           "paru"
 
+check_bin  "Tmux"           "tmux"
+check_dir  "TPM"            "$HOME/.tmux/plugins/tpm"
+
 # Utilities
 check_bin  "Rsync"          "rsync"
 

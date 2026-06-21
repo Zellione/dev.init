@@ -19,6 +19,7 @@ RUN echo "testuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/testuser \
 # Install dev toolchains as testuser (Go via sudo → system-wide, Rust/nvm/vcpkg → $HOME)
 USER testuser
 RUN bash /workspace/linux/wsl/ubuntu/runs/02-dev-tools.sh
+RUN bash /workspace/linux/wsl/ubuntu/runs/04-tpm.sh
 USER root
 
 RUN chown -R testuser:testuser /workspace
