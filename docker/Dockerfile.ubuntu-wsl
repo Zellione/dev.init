@@ -1,0 +1,33 @@
+# syntax=docker/dockerfile:1
+FROM ubuntu:24.04
+
+RUN apt-get update && apt-get install -y bash coreutils grep findutils git sudo curl wget
+
+COPY . /workspace/
+
+# Run apt-based install scripts as root
+RUN bash /workspace/linux/wsl/ubuntu/runs/01-packages.sh
+RUN bash /workspace/linux/wsl/ubuntu/runs/03-fonts.sh
+
+# Create non-root user for toolchain installs and runtime testing
+RUN useradd -m -s /bin/bash testuser
+
+# Grant testuser passwordless sudo
+RUN echo "testuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/testuser \
+    && chmod 0440 /etc/sudoers.d/testuser
+
+# Install dev toolchains as testuser (Go via sudo → system-wide, Rust/nvm/vcpkg → $HOME)
+USER testuser
+RUN bash /workspace/linux/wsl/ubuntu/runs/02-dev-tools.sh
+RUN bash /workspace/linux/wsl/ubuntu/runs/04-tpm.sh
+USER root
+
+RUN chown -R testuser:testuser /workspace
+
+# Rebuild system font cache (installed as root, must be cached for all users)
+RUN fc-cache -f
+
+USER testuser
+WORKDIR /workspace
+
+ENTRYPOINT ["bash", "docker/test-entrypoint-ubuntu-wsl.sh"]

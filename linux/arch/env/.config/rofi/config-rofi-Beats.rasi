@@ -1,0 +1,13 @@
+/* Rofi Beats Config */
+
+@import "~/.config/rofi/config-compact.rasi"
+
+/* ---- Entry ---- */
+entry {
+  placeholder: "❯ Choose Media or Station";
+}
+
+/* ---- Listview ---- */
+listview {
+  lines: 7;
+}

@@ -1,0 +1,109 @@
+{
+  "env": {
+    "MAX_THINKING_TOKENS": "20000",
+    "CLAUDE_MAX_CONTEXT_WINDOW": "400000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
+    "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "model": "sonnet",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "wsl-screenshot-cli start --daemon --quiet 2>/dev/null"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": \"MANDATORY: Before starting any coding task, call mcp__serena__initial_instructions FIRST. Then load Serena tools via ToolSearch before reading or editing any code files. This is a hard requirement.\"}}' 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Done!\" &'"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); echo \"$input\" | jq -e '.stop_hook_active == true' >/dev/null 2>&1 && exit 0; echo '{\"hookSpecificOutput\": {\"hookEventName\": \"Stop\", \"additionalContext\": \"Before finishing: if you introduced new conventions, patterns, services, or structural changes to the codebase this turn, update the relevant Serena memory (mem:core, mem:conventions, mem:tech_stack, or mem:task_completion) using mcp__serena__write_memory.\"}}'"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Needs your input!\" &'"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "ccstatusline",
+    "padding": 0,
+    "refreshInterval": 10
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": true,
+    "csharp-lsp@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "huggingface-skills@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "lua-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "session-report@claude-plugins-official": true
+  },
+  "theme": "dark"
+}

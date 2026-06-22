@@ -1,19 +1,25 @@
 #!/usr/bin/env bash
-# Wrapper: set DEV_ENV, parse args, source run.sh library, call run_scripts().
+# Wrapper: set DEV_ENV, parse args, source lib/run.sh, call run_scripts().
 set -euo pipefail
 
 export DEV_ENV="$(cd "$(dirname "$0")" && pwd)/macos"
 
-DRY_RUN=0
+export DRY_RUN=0
+TAGS_FILTER=""
+TAGS_EXCLUDE=""
 PATTERN=""
-for arg in "$@"; do
-    case "$arg" in
+while [[ $# -gt 0 ]]; do
+    case "$1" in
         --dry) DRY_RUN=1 ;;
-        *)     PATTERN="$arg" ;;
+        --tags=*) TAGS_FILTER="${1#--tags=}" ;;
+        --tags) TAGS_FILTER="$2"; shift ;;
+        --exclude=*) TAGS_EXCLUDE="${1#--exclude=}" ;;
+        --exclude) TAGS_EXCLUDE="$2"; shift ;;
+        *)     PATTERN="$1" ;;
     esac
+    shift
 done
+export TAGS_FILTER TAGS_EXCLUDE
 
-# Pass through to library (source consumes nothing if args already set)
-export DRY_RUN
-source "$(dirname "$0")/run.sh"
+source "$(dirname "$0")/lib/run.sh"
 run_scripts "${PATTERN:-}"

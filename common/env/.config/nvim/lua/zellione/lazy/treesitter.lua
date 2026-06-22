@@ -1,8 +1,18 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
-	build = ":TSUpdate",
-	opts = {
-		ensure_installed = {
+    branch = "main",
+	lazy = false,
+    build = ":TSUpdate",
+	config = function()
+		require("nvim-treesitter").setup {
+			install_dir = vim.fn.stdpath("data") .. "/site",
+            auto_install = true,
+            highlight = {
+                enable = true,
+            }
+		}
+
+		local ensure_installed = {
 			"bash",
 			"c",
 			"cpp",
@@ -17,20 +27,26 @@ return {
 			"typescript",
 			"jsdoc",
 			"go",
-			"gomod",
-			"gosum",
-			"gotmpl",
-		},
-		highlight = { enable = true },
-		indent = { enable = true },
-	},
-	config = function(_, opts)
-		-- nvim-treesitter v1.0+ removed the `nvim-treesitter.configs` module.
-		-- Setup now lives on the top-level module.
-		require("nvim-treesitter").setup(opts)
+		}
 
-		-- Register markdown_inline as an embedded language of markdown so
-		-- treesitter-context (and highlighting) follow it inside markdown files.
+		local installed = require("nvim-treesitter.config").get_installed()
+		local to_install = vim.iter(ensure_installed)
+			:filter(function(parser)
+				return not vim.tbl_contains(installed, parser)
+			end)
+			:totable()
+
+		if #to_install > 0 then
+			require("nvim-treesitter").install(to_install)
+		end
+
+		vim.api.nvim_create_autocmd("FileType", {
+			callback = function()
+				pcall(vim.treesitter.start)
+				vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+			end,
+		})
+
 		pcall(vim.treesitter.language.register, "markdown", "markdown_inline")
 	end,
 }

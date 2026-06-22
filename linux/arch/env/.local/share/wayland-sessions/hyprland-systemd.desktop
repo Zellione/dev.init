@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Hyprland (systemd)
+Comment=Hyprland with systemd auto-relaunch on crash
+Exec=/home/zellione/.local/bin/hyprland-launcher
+Type=Application
+DesktopNames=Hyprland

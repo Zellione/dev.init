@@ -1,0 +1,25 @@
+[manager]
+show_hidden = true
+sort_by = "natural"
+sort_dir_first = true
+linemode = "size"
+ratio = [1, 3, 4]
+
+[preview]
+max_width = 1000
+max_height = 1000
+cache_dir = "~/.cache/yazi"
+
+[opener]
+edit = ["nvim \"$@\"", "block"]
+open = ["xdg-open \"$@\"", "orphan"]
+
+[open]
+rules = [
+    { name = "*/", use = ["open", "edit"] },
+    { mime = "text/*", use = ["edit"] },
+    { mime = "image/*", use = ["open"] },
+    { mime = "video/*", use = ["open"] },
+    { mime = "audio/*", use = ["open"] },
+    { mime = "application/pdf", use = ["open"] },
+]

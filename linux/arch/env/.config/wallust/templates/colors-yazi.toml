@@ -1,0 +1,76 @@
+# wallust template - yazi theme
+
+[confirm]
+# inherit defaults
+
+[status]
+separator_open  ""
+separator_close ""
+separator_style = { fg = "{{foreground}}", bg = "{{color0}}" }
+
+[status.mode]
+normal = { fg = "{{background}}", bg = "{{color4}}", bold = true }
+select = { fg = "{{background}}", bg = "{{color6}}", bold = true }
+unset  = { fg = "{{background}}", bg = "{{color8}}", bold = true }
+
+[status.permissions]
+r = { fg = "{{color1}}" }
+w = { fg = "{{color3}}" }
+x = { fg = "{{color2}}" }
+r_off = "{{color8}}"
+r_on  = "{{color1}}"
+w_off = "{{color8}}"
+w_on  = "{{color3}}"
+x_off = "{{color8}}"
+x_on  = "{{color2}}"
+
+[input]
+border_style = { fg = "{{color4}}" }
+
+[select]
+active   = { fg = "{{color4}}", bold = true }
+inactive = { fg = "{{foreground}}" }
+
+[tabs]
+active   = { fg = "{{background}}", bg = "{{color4}}", bold = true }
+inactive = { fg = "{{foreground}}", bg = "{{color0}}" }
+border   = { fg = "{{color4}}" }
+
+[which]
+mask      = { fg = "{{background}}", bg = "{{color4}}" }
+candidate = { fg = "{{foreground}}", bold = true }
+
+[help]
+on       = { fg = "{{color4}}", bold = true }
+running  = { fg = "{{background}}", bg = "{{color4}}" }
+desc     = { fg = "{{color8}}" }
+border   = { fg = "{{color4}}" }
+
+[manager]
+border_symbol  "│"
+border_style   = { fg = "{{color8}}" }
+tab_active     = { fg = "{{background}}", bg = "{{color4}}", bold = true }
+tab_inactive   = { fg = "{{foreground}}", bg = "{{color0}}" }
+tab_border     = { fg = "{{color8}}" }
+count_copied   = { fg = "{{background}}", bg = "{{color2}}" }
+count_cut      = { fg = "{{background}}", bg = "{{color1}}" }
+count_selected = { fg = "{{background}}", bg = "{{color6}}" }
+
+[marker]
+copied  = { fg = "{{color2}}" }
+cut     = { fg = "{{color1}}" }
+marked  = { fg = "{{color4}}" }
+selected = { fg = "{{color6}}" }
+
+[files]
+selected = { fg = "{{background}}", bg = "{{color4}}" }
+unselected = { fg = "{{foreground}}" }
+found     = { fg = "{{background}}", bg = "{{color6}}", bold = true }
+preview_hovered = { fg = "{{background}}", bg = "{{color4}}" }
+
+[directory]
+hidden   = { fg = "{{color8}}", bold = true }
+found    = { fg = "{{background}}", bg = "{{color6}}", bold = true }
+unfound  = { fg = "{{foreground}}" }
+
+[callback]

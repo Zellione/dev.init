@@ -1,0 +1,10 @@
+# syntax=docker/dockerfile:1
+FROM ubuntu:24.04
+
+RUN apt-get update && apt-get install -y bash coreutils grep findutils rsync
+
+COPY . /workspace/
+RUN chmod -R a+rX /workspace
+
+WORKDIR /workspace
+ENTRYPOINT ["bash", "docker/test-tags-ubuntu-wsl.sh"]
