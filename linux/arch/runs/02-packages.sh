@@ -17,6 +17,7 @@ PACKAGES=(
     thunar
     tmux
     yazi
+    fd
 
     # Editor
     neovim
