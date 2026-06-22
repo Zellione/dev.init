@@ -1,0 +1,176 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "1",
+        "type": "model",
+        "color": "brightBlue"
+      },
+      {
+        "id": "2",
+        "type": "separator"
+      },
+      {
+        "id": "d9da7eb7-a5f3-4829-86d8-3cae33ef5d72",
+        "type": "thinking-effort",
+        "color": "brightBlack"
+      },
+      {
+        "id": "4",
+        "type": "separator"
+      },
+      {
+        "id": "0959fab6-2dfd-463a-b05a-f118170d3a17",
+        "type": "context-bar",
+        "color": "blue"
+      },
+      {
+        "id": "2132942c-5eb9-4a91-bc6c-d5d7da3c792c",
+        "type": "separator"
+      },
+      {
+        "id": "9d46313c-d8e6-4765-928b-b95fb50a95fa",
+        "type": "compaction-counter"
+      },
+      {
+        "id": "31539b05-6473-4306-af6d-41b3b1948a63",
+        "type": "flex-separator",
+        "color": "white"
+      },
+      {
+        "id": "5",
+        "type": "git-branch",
+        "color": "magenta"
+      },
+      {
+        "id": "6",
+        "type": "separator"
+      },
+      {
+        "id": "7",
+        "type": "git-changes",
+        "color": "yellow"
+      }
+    ],
+    [
+      {
+        "id": "15d812b8-2d9d-42dd-a192-77ed562d792a",
+        "type": "version",
+        "color": ""
+      },
+      {
+        "id": "c627aa0c-300a-4218-844b-c3a5a442d45f",
+        "type": "separator"
+      },
+      {
+        "id": "9954bc09-9294-450d-987b-6c1c26fdb197",
+        "type": "free-memory",
+        "color": "green"
+      },
+      {
+        "id": "074925cf-1a26-478d-bc6c-c95522c51656",
+        "type": "flex-separator"
+      },
+      {
+        "id": "342728c5-1f67-468f-ad7b-ee69682c4051",
+        "type": "skills",
+        "color": "brightBlue"
+      },
+      {
+        "id": "5ae2b931-50a1-41cb-8df7-a046499f1100",
+        "type": "separator"
+      },
+      {
+        "id": "d747a8b3-a6dc-4b39-aa1a-2387962ace73",
+        "type": "worktree-name",
+        "color": "cyan"
+      }
+    ],
+    [
+      {
+        "id": "292df148-b3eb-432c-91c0-e09f8cd0a817",
+        "type": "session-name",
+        "color": "yellow"
+      },
+      {
+        "id": "6c84466c-0b85-4403-901d-32d3dc05047a",
+        "type": "separator"
+      },
+      {
+        "id": "86508486-60f2-4c9d-b52b-4de71d70ccab",
+        "type": "session-clock",
+        "color": ""
+      },
+      {
+        "id": "1d0bad25-446c-4600-b77d-99fb6d71ef6c",
+        "type": "separator"
+      },
+      {
+        "id": "4f263983-9181-4c9a-bb98-ec65152627a4",
+        "type": "session-cost",
+        "color": "brightBlack"
+      },
+      {
+        "id": "ccc7d1f6-0407-4999-87d3-5a73dae7f26f",
+        "type": "flex-separator"
+      },
+      {
+        "id": "1e428457-6d4f-42ff-a43a-6fce38f63d5a",
+        "type": "tokens-input",
+        "color": "green"
+      },
+      {
+        "id": "94084dad-b4ad-47d1-a421-6dec3aa7b312",
+        "type": "separator"
+      },
+      {
+        "id": "2174e0a2-bfb6-4a92-b0f6-01b9201970a8",
+        "type": "tokens-output",
+        "color": "brightYellow"
+      },
+      {
+        "id": "aaa966ed-dce8-46d2-95d1-9096d3beff90",
+        "type": "separator"
+      },
+      {
+        "id": "8fd84b4b-8742-4bcb-8413-d7e24058d2a0",
+        "type": "tokens-cached",
+        "color": "brightBlue"
+      },
+      {
+        "id": "f465ed4e-c69d-44fd-b9aa-b680534bc064",
+        "type": "separator"
+      },
+      {
+        "id": "00b9495e-406c-4633-aa85-5841b4b7113f",
+        "type": "tokens-total",
+        "color": "white"
+      }
+    ]
+  ],
+  "flexMode": "full",
+  "compactThreshold": 60,
+  "colorLevel": 3,
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "gitCacheTtlSeconds": 5,
+  "minimalistMode": false,
+  "powerline": {
+    "enabled": false,
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
+    "startCaps": [],
+    "endCaps": [],
+    "autoAlign": false,
+    "continueThemeAcrossLines": false
+  },
+  "installation": {
+    "method": "pinned",
+    "installedVersion": "2.2.19"
+  }
+}
