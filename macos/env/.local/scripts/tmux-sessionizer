@@ -13,6 +13,9 @@ has_session() {
 }
 
 hydrate() {
+    local pane_cmd=$(tmux display-message -p -t $1 '#{pane_current_command}')
+    [[ $pane_cmd == "vim" || $pane_cmd == "nvim" ]] && return
+
     if [ -f $2/.tmux-sessionizer ]; then
         tmux send-keys -t $1 "source $2/.tmux-sessionizer" c-M
     elif [ -f $HOME/.tmux-sessionizer ]; then
@@ -23,7 +26,7 @@ hydrate() {
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$(find ~/projects ~/ -mindepth 1 -maxdepth 1 -type d | fzf)
+    selected=$(find ~/projects ~/tools ~/ -mindepth 1 -maxdepth 1 -type d | fzf)
 fi
 
 if [[ -z $selected ]]; then
@@ -34,8 +37,9 @@ selected_name=$(basename "$selected" | tr . _)
 tmux_running=$(pgrep tmux)
 
 if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
-    tmux new-session -s $selected_name -c $selected
+    tmux new-session -ds $selected_name -c $selected
     hydrate $selected_name $selected
+    tmux attach-session -t $selected_name
     exit 0
 fi
 
