@@ -5,10 +5,6 @@ require("zellione.set")
 require("zellione.remap")
 require("zellione.lazy_init")
 
-vim.notify = function(msg, opts)
-	require("notify")(msg, opts)
-end
-
 local augroup = vim.api.nvim_create_augroup
 local ZellioneGroup = augroup("Zellione", { clear = true })
 
