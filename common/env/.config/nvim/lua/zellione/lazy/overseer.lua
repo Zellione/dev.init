@@ -2,8 +2,7 @@ return {
 	"stevearc/overseer.nvim",
 	dependencies = {
 		"nvim-telescope/telescope.nvim",
-		"stevearc/dressing.nvim",
-		"rcarriga/nvim-notify",
+		"folke/snacks.nvim",
 	},
 	opts = {},
 	config = function(_, opts)

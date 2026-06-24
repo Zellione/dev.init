@@ -8,7 +8,7 @@ return {
 		{
 			"nvim-telescope/telescope-ui-select.nvim",
 		},
-		"rcarriga/nvim-notify",
+		"folke/snacks.nvim",
 	},
 	config = function()
 		local telescopeConfig = require("telescope.config")
@@ -27,8 +27,8 @@ return {
 				-- `hidden = true` is not supported in text grep commands.
 				vimgrep_arguments = vimgrep_arguments,
 				path_display = {
-                    "truncate"
-                },
+					"truncate",
+				},
 			},
 			pickers = {
 				find_files = {
@@ -45,7 +45,6 @@ return {
 
 		pcall(require("telescope").load_extension, "fzf")
 		pcall(require("telescope").load_extension, "ui-select")
-		pcall(require("telescope").load_extension, "notify")
 
 		-- See `:help telescope.builtin`
 		local builtin = require("telescope.builtin")
@@ -83,7 +82,7 @@ return {
 		end, { desc = "[S]earch Neo[v]im files" })
 
 		vim.keymap.set("n", "<leader>sn", function()
-			require("telescope").extensions.notify.notify()
+			Snacks.notifier.show_history()
 		end, { desc = "[S]earch [N]otifications" })
 	end,
 }

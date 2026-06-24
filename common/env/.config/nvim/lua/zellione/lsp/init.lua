@@ -84,9 +84,6 @@ M.setup = function()
 				vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
 			end
 
-			if client and client.server_capabilities.signatureHelpProvider then
-				vim.lsp.buf.signature_help({ trigger = true })
-			end
 		end,
 	})
 
