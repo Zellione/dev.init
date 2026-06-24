@@ -5,6 +5,6 @@ return {
 	config = function()
 		vim.cmd.colorscheme("tokyonight-night")
 
-		vim.api.nvim_set_hl(0, "Comment", { italic = false, bold = false })
+		vim.api.nvim_set_hl(0, "@lsp.type.comment", { link = "Comment" })
 	end,
 }
