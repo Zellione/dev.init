@@ -13,6 +13,9 @@ return {
 				end
 				return "make install_jsregexp"
 			end)(),
+			dependencies = {
+				"rafamadriz/friendly-snippets",
+			},
 		},
 		"saadparwaiz1/cmp_luasnip",
 
@@ -23,18 +26,19 @@ return {
 		"hrsh7th/cmp-buffer",
 		"hrsh7th/cmp-path",
 		"hrsh7th/cmp-cmdline",
-
-		-- If you want to add a bunch of pre-configured snippets,
-		--    you can use this plugin to help you. It even has snippets
-		--    for various frameworks/libraries/etc. but you will have to
-		--    set up the ones that are useful for you.
-		"rafamadriz/friendly-snippets",
 	},
 	config = function()
 		local cmp = require("cmp")
 		local luasnip = require("luasnip")
-		luasnip.config.setup({})
 
+		-- 2. CRITICAL: This line loads friendly-snippets (C++, Java, etc.) into LuaSnip
+		require("luasnip.loaders.from_vscode").lazy_load()
+
+		-- 3. OPTIONAL: Robot Framework handles filetypes uniquely.
+		-- If friendly-snippets doesn't auto-link it, link it to 'robot' text here:
+		luasnip.filetype_extend("robot", { "robot" })
+
+		luasnip.config.setup({})
 		cmp.setup({
 			snippet = {
 				expand = function(args)
@@ -58,6 +62,26 @@ return {
 				--  completions whenever it has completion options available.
 				["<C-Space>"] = cmp.mapping.complete({}),
 
+				-- Enhanced Tab/S-Tab mapping for easier snippet navigation
+				["<Tab>"] = cmp.mapping(function(fallback)
+					if cmp.visible() then
+						cmp.select_next_item()
+					elseif luasnip.expand_or_locally_jumpable() then
+						luasnip.expand_or_jump()
+					else
+						fallback()
+					end
+				end, { "i", "s" }),
+				["<S-Tab>"] = cmp.mapping(function(fallback)
+					if cmp.visible() then
+						cmp.select_prev_item()
+					elseif luasnip.locally_jumpable(-1) then
+						luasnip.jump(-1)
+					else
+						fallback()
+					end
+				end, { "i", "s" }),
+
 				-- Think of <c-l> as moving to the right of your snippet expansion.
 				--  So if you have a snippet that's like:
 				--  function $name($args)
@@ -77,12 +101,13 @@ return {
 					end
 				end, { "i", "s" }),
 			}),
-			sources = {
-				{ name = "nvim_lsp" },
-				{ name = "luasnip" },
+			sources = cmp.config.sources({
+				{ name = "nvim_lsp", keyword_length = 1 },
+				{ name = "luasnip", keyword_length = 2 },
+			}, {
 				{ name = "path" },
-				{ name = "buffer" },
-			},
+				{ name = "buffer", keyword_length = 3 },
+			}),
 		})
 	end,
 }
