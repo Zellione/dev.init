@@ -7,17 +7,17 @@ M.setup = function()
 	-- servers (lua_ls vs lua-language-server, etc.), so we maintain this table
 	-- explicitly now that mason-lspconfig is no longer pulling the translations.
 	local servers = {
-		{ lsp = "lua_ls",               mason = "lua-language-server" },
-		{ lsp = "ts_ls",                mason = "typescript-language-server" },
-		{ lsp = "eslint",               mason = "eslint-lsp" },
-		{ lsp = "clangd",               mason = "clangd" },
+		{ lsp = "lua_ls", mason = "lua-language-server" },
+		{ lsp = "ts_ls", mason = "typescript-language-server" },
+		{ lsp = "eslint", mason = "eslint-lsp" },
+		{ lsp = "clangd", mason = "clangd" },
 		{ lsp = "jedi_language_server", mason = "jedi-language-server" },
-		{ lsp = "phpactor",             mason = "phpactor" },
-		{ lsp = "zls",                  mason = "zls" },
-		{ lsp = "gopls",                mason = "gopls" },
-		{ lsp = "jdtls",                mason = "jdtls" },
-		{ lsp = "robotcode",            mason = "robotcode" },
-		{ lsp = "bashls",               mason = "bash-language-server" },
+		{ lsp = "phpactor", mason = "phpactor" },
+		{ lsp = "zls", mason = "zls" },
+		{ lsp = "gopls", mason = "gopls" },
+		{ lsp = "jdtls", mason = "jdtls" },
+		{ lsp = "robotcode", mason = "robotcode" },
+		{ lsp = "bashls", mason = "bash-language-server" },
 	}
 
 	local mason_packages = vim.tbl_map(function(s)
@@ -67,6 +67,7 @@ M.setup = function()
 			map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
 			map("K", vim.lsp.buf.hover, "Hover Documentation")
 			map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+			map("<leader>e", vim.diagnostic.open_float, "Show Line [E]rror Diagnostics")
 
 			local client = vim.lsp.get_client_by_id(event.data.client_id)
 			if client and client.server_capabilities.documentHighlightProvider then
@@ -83,7 +84,6 @@ M.setup = function()
 			if client and client.server_capabilities.inlayHintProvider then
 				vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
 			end
-
 		end,
 	})
 
