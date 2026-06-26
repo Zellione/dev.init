@@ -31,15 +31,17 @@ M.setup = function()
 		ensure_installed = mason_packages,
 	})
 
+	local capabilities = vim.lsp.protocol.make_client_capabilities()
+	capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+
+	vim.lsp.config("*", { capabilities = capabilities })
+
 	for _, name in ipairs(lsp_names) do
 		local ok, conf = pcall(require, "zellione.lsp." .. name)
 		vim.lsp.config(name, ok and conf or {})
 	end
 
 	vim.lsp.enable(lsp_names)
-
-	local capabilities = vim.lsp.protocol.make_client_capabilities()
-	capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 
 	vim.diagnostic.config({
 		virtual_text = true,
@@ -95,7 +97,6 @@ M.setup = function()
 		end,
 	})
 
-	_G.__lsp_capabilities = capabilities
 end
 
 return M
