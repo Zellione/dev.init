@@ -69,6 +69,7 @@ deploy_dotfiles() {
 
     deploy_file "$env_base/arch/env/.zsh_profile"     "$HOME/.zsh_profile"
     deploy_file "$env_base/arch/env/.zshrc"            "$HOME/.zshrc"
+    deploy_file "$env_base/arch/env/.config/brave-nightly-flags.conf"     "$HOME/.config/brave-nightly-flags.conf"
     deploy_file "$env_base/common/env/.tmux-cht-command"  "$HOME/.tmux-cht-command"
     deploy_file "$env_base/common/env/.tmux-cht-languages" "$HOME/.tmux-cht-languages"
     deploy_file "$env_base/common/env/.tmux.conf"         "$HOME/.tmux.conf"

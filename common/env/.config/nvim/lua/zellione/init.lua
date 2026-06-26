@@ -4,6 +4,7 @@ vim.g.loaded_netrwPlugin = 1
 require("zellione.set")
 require("zellione.remap")
 require("zellione.lazy_init")
+require("zellione.clang_tidy").setup()
 
 local augroup = vim.api.nvim_create_augroup
 local ZellioneGroup = augroup("Zellione", { clear = true })

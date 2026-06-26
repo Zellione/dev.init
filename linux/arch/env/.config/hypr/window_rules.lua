@@ -20,7 +20,14 @@
 -- hl.window_rule({ match = { class = "zoom" }, float = true })
 -- hl.window_rule({ match = { class = "rofi" }, float = true })
 -- hl.window_rule({ match = { class = "gnome-system-monitor" }, float = true })
-hl.window_rule({ match = { class = "yad"  }, float = true })
+hl.window_rule({ match = { class = "yad" }, float = true })
+
+-- Firefox
+hl.window_rule({ match = { class = "firefox", fullscreen = true }, idle_inhibit = "always" })
+
+-- Chromium / Chrome / Brave
+hl.window_rule({ match = { class = "chromium", fullscreen = true }, idle_inhibit = "always" })
+hl.window_rule({ match = { class = "brave-browser-nightly", fullscreen = true }, idle_inhibit = "always" })
 
 -- ---- Gamescope ---------------------------------------------
 -- hl.window_rule({ match = { class = "gamescope" }, no_blur   = true   })
@@ -74,10 +81,10 @@ hl.window_rule({ match = { class = "yad"  }, float = true })
 -- (see ArtsyMacaw/wlogout main.c: gtk_layer_set_namespace(win, "logout_dialog")),
 -- not "wlogout". If a layer rule doesn't seem to apply, run
 -- `hyprctl layers` while the surface is open to confirm the namespace.
-hl.layer_rule({ match = { namespace = "^([Rr]ofi)$"      }, blur         = true })
-hl.layer_rule({ match = { namespace = "^([Rr]ofi)$"      }, ignore_alpha = 0 })
-hl.layer_rule({ match = { namespace = "^logout_dialog$"  }, blur         = true })
-hl.layer_rule({ match = { namespace = "^logout_dialog$"  }, ignore_alpha = 0 })
+hl.layer_rule({ match = { namespace = "^([Rr]ofi)$" }, blur = true })
+hl.layer_rule({ match = { namespace = "^([Rr]ofi)$" }, ignore_alpha = 0 })
+hl.layer_rule({ match = { namespace = "^logout_dialog$" }, blur = true })
+hl.layer_rule({ match = { namespace = "^logout_dialog$" }, ignore_alpha = 0 })
 
 -- ---- Picture-in-Picture ------------------------------------
 -- NOTE: PIP window changes class/title after first launch;
@@ -90,3 +97,4 @@ hl.layer_rule({ match = { namespace = "^logout_dialog$"  }, ignore_alpha = 0 })
 --     move    = "72% 7%",
 --     opacity = "0.95 0.75",
 -- })
+--
