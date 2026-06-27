@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+# Allow users to override command-line options
+USER_FLAGS_FILE="$XDG_CONFIG_HOME/brave-nightly-flags.conf"
+FLAG_LIST=()
+if [[ -f $USER_FLAGS_FILE ]]; then
+	mapfile -t CONF_LIST < "$USER_FLAGS_FILE"
+	for line in "${CONF_LIST[@]}"; do
+	   [[ "$line" =~ ^[[:space::]]*(#|$) ]] || FLAG_LIST+=("$line")
+	done
+fi
+
+if [[ -z "${CHROME_USER_DATA_DIR}" ]]; then
+    export CHROME_USER_DATA_DIR=~/.config/BraveSoftware/Brave-Browser-Nightly
+fi
+exec "/opt/brave.com/brave-nightly/brave-browser" "${FLAG_LIST[@]}" "$BRAVE_FLAGS" "$FLAG" "$@"
+
