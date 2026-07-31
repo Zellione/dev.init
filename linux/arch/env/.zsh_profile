@@ -27,4 +27,6 @@ addToPathFront /home/zellione/go/bin
 tmux=$(which tmux)
 alias tmux="$tmux -2"
 
+alias claude="systemd-inhibit --what=idle --who=\"claude\" --why=\"running claude\" claude"
+
 export VCPKG_ROOT=/home/zellione/tools/vcpkg

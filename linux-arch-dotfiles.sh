@@ -42,6 +42,7 @@ deploy_dotfiles() {
 
     deploy_file "$env_base/arch/env/.claude/settings.json" "$HOME/.claude/settings.json"
     deploy_file "$env_base/common/env/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
+    deploy_file "$env_base/env/.claude/statusline-command.sh" "$HOME/.claude/statusline-command.sh"
 
     # Regenerate wallust colors for current wallpaper
     _wallust_script="$HOME/.config/hypr/scripts/wallust_swww.sh"
@@ -69,11 +70,13 @@ deploy_dotfiles() {
 
     deploy_file "$env_base/arch/env/.zsh_profile"     "$HOME/.zsh_profile"
     deploy_file "$env_base/arch/env/.zshrc"            "$HOME/.zshrc"
-    deploy_file "$env_base/arch/env/.config/brave-nightly-flags.conf"     "$HOME/.config/brave-nightly-flags.conf"
     deploy_file "$env_base/common/env/.tmux-cht-command"  "$HOME/.tmux-cht-command"
     deploy_file "$env_base/common/env/.tmux-cht-languages" "$HOME/.tmux-cht-languages"
     deploy_file "$env_base/common/env/.tmux.conf"         "$HOME/.tmux.conf"
     deploy_file "$env_base/common/env/.tmux-sessionizer"  "$HOME/.tmux-sessionizer"
+
+    deploy_file "$env_base/arch/env/.config/brave-nightly-flags.conf"     "$HOME/.config/brave-nightly-flags.conf"
+    deploy_file_to_sys_dir "$env_base/arch/brave-nightly/brave-nightly" "/usr/bin/brave-nightly"
 
     log "dotfiles deployment complete."
 }

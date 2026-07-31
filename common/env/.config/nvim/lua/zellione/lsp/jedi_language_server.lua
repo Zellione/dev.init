@@ -1,34 +1,47 @@
-local cwd = vim.uv.cwd()
+-- 1. Grab the active root directory safely
+local root = vim.fn.fnamemodify(vim.uv.cwd(), ":p")
+
 local venv_paths = {
-	cwd .. "/.venv",
-	cwd .. "/venv",
-	cwd .. "/venv_robot",
-	vim.env.VIRTUAL_ENV,
+	root .. ".venv",
+	root .. "venv",
+	root .. "venv_robot",
 }
+
+if vim.env.VIRTUAL_ENV then
+	table.insert(venv_paths, vim.env.VIRTUAL_ENV)
+end
 
 local active_venv = nil
 for _, path in ipairs(venv_paths) do
-	if path and vim.fn.isdirectory(path) == 1 then
+	if vim.fn.isdirectory(path) == 1 then
 		active_venv = path
 		break
 	end
 end
 
-local extra_paths = {}
+-- 2. Build our standard native configuration object
+local config = {
+	root_markers = { ".git", "pyproject.toml", "setup.py", "requirements.txt" },
+
+	on_init = function(client)
+		-- Instantly kill the instance if it catches Homebrew's root .git directory
+		if client.root_dir and client.root_dir:match("^/opt/homebrew") then
+			client:stop(true)
+		end
+	end,
+}
+
+-- 3. Hard-inject options directly as top-level keys if a valid venv is found
 if active_venv then
-	-- Dynamically locate the site-packages inside the virtual environment
-	local site_pkgs = vim.fn.glob(active_venv .. "/lib/python*/site-packages", false, true)
-	for _, pkg_path in ipairs(site_pkgs) do
-		table.insert(extra_paths, pkg_path)
-	end
+	config.init_options = {
+		workspace = {
+			environmentPath = active_venv,
+		},
+	}
+	config.cmd_env = {
+		VIRTUAL_ENV = active_venv,
+		PATH = active_venv .. "/bin:" .. (vim.env.PATH or ""),
+	}
 end
 
-return {
-	settings = {
-		jedi = {
-			workspace = {
-				extraPaths = extra_paths,
-			},
-		},
-	},
-}
+return config

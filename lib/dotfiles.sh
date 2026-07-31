@@ -89,3 +89,27 @@ deploy_file() {
         log "skipping (not found): ${src}"
     fi
 }
+
+
+deploy_file_to_sys_dir() {
+    local src="$1"
+    local dest="$2"
+
+    local item_tags
+    item_tags=$(_read_item_tags "$src")
+    if ! _matches_tags "$item_tags"; then
+        log "   filtered (tags: ${item_tags:-none}): ${YELLOW}${src}${ENCOLOR}"
+        return 0
+    fi
+
+    if [[ -e "${src}" ]]; then
+        log "removing: ${RED}${dest}${ENCOLOR}"
+        if [[ "${DRY_RUN:-0}" == "0" ]]; then sudo rm -f "$dest"; fi
+        log "copying: ${YELLOW}${src}${ENCOLOR} -> ${dest}${ENCOLOR}"
+        if [[ "${DRY_RUN:-0}" == "0" ]]; then
+            sudo cp "${src}" "${dest}"
+        fi
+    else
+        log "skipping (not found): ${src}"
+    fi
+}
