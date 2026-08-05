@@ -39,6 +39,38 @@
                     }
                 }
             }
+        },
+        "local-wsl-vllm": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "Local WSL vLLM",
+            "options": {
+                "baseURL": "http://127.0.0.1:8001/v1"
+            },
+            "models": {
+                "unsloth/Qwen3.6-27B-NVFP4": {
+                    "tools": true,
+                    "limit": {
+                        "context": 110000,
+                        "output": 8192
+                    }
+                }
+            }
+        },
+        "Llama.cpp WSL": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "Local Qwen 3.6 MTP 27B GGUF",
+            "options": {
+                "baseURL": "http://127.0.0.1/8080/v1"
+            },
+            "models": {
+                "unsloth/Qwen3.6-GGUF-MTP-27B": {
+                    "name": "Local Qwen 3.6 MTP 27B GGUF",
+                    "context": 200000,
+                    "output": 32768,
+                    "tool_call": true,
+                    "reasoning": true
+                }
+            }
         }
     },
     "mcp": {

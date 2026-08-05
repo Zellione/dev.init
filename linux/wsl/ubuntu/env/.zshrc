@@ -161,3 +161,6 @@ source "$HOME/.cargo/env" 2>/dev/null || true
 
 export VCPKG_ROOT=$HOME/tools/vcpkg
 export PKG_CONFIG_LIBDIR=/usr/lib/pkgconfig
+
+export PATH=/usr/local/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
