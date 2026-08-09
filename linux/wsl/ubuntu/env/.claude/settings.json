@@ -41,15 +41,6 @@
             "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Done!\" &'"
           }
         ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "input=$(cat); echo \"$input\" | jq -e '.stop_hook_active == true' >/dev/null 2>&1 && exit 0; echo '{\"hookSpecificOutput\": {\"hookEventName\": \"Stop\", \"additionalContext\": \"Before finishing: if you introduced new conventions, patterns, services, or structural changes to the codebase this turn, update the relevant Serena memory (mem:core, mem:conventions, mem:tech_stack, or mem:task_completion) using mcp__serena__write_memory.\"}}'"
-          }
-        ]
       }
     ],
     "PermissionRequest": [
