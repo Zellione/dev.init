@@ -1,3 +1,3 @@
 #!/usr/bin/env zsh
-hyprctl dispatch dpms on
+hyprctl dispatch 'hl.dsp.dpms({ action = "on" })'
 pidof hyprlock > /dev/null || loginctl lock-session
