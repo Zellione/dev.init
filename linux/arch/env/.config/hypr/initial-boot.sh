@@ -26,8 +26,8 @@ if [ ! -f ~/.config/hypr/.initial_startup_done ]; then
     gsettings set org.gnome.desktop.interface cursor-theme Bibata-Modern-Ice > /dev/null 2>&1 &
     gsettings set org.gnome.desktop.interface cursor-size 24 > /dev/null 2>&1 &
 
-    # Initialize keyboard layout
-    "$scriptsDir/switch_keyboard_layout.sh" > /dev/null 2>&1 &
+    # Keyboard layout needs no initialisation: xkb starts on the first entry of
+    # input.kb_layout and Alt+Shift cycles from there (grp:alt_shift_toggle).
 
     # Create a marker file to indiciate that the initial startup has been done
     touch ~/.config/hypr/.initial_startup_done

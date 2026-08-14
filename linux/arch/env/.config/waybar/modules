@@ -112,11 +112,11 @@
     },
 
     "hyprland/language": {
-        "format": "Lang: {}",
-        "format-en": "US",
-        "format-tr": "Korea",
         "keyboard-name": "at-translated-set-2-keyboard",
-        "on-click": "hyprctl switchxkblayout $SET_KB next"
+        "format": " {}",
+        "format-de": " de",
+        "format-en": " us",
+        "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
     },
 
     "hyprland/submap": {
@@ -300,13 +300,6 @@
     "custom/cava_mviz": {
         "exec": "~/.config/hypr/scripts/waybar_cava.sh",
         "format": "{}"
-    },
-
-    "custom/keyboard": {
-        "exec": "cat ~/.cache/kb_layout",
-        "interval": 1,
-        "format": " {}",
-        "on-click": "~/.config/hypr/scripts/switch_keyboard_layout.sh"
     },
 
     "custom/lock": {

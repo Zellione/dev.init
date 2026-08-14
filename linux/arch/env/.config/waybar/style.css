@@ -109,6 +109,7 @@ tooltip label {
 #disk,
 #idle_inhibitor,
 #keyboard-state,
+#language,
 #memory,
 #mode,
 #mpris,
@@ -122,7 +123,6 @@ tooltip label {
 #wireplumber,
 #workspaces,
 #custom-cava_mviz,
-#custom-keyboard,
 #custom-lock,
 #custom-power,
 #custom-swaync,
@@ -212,6 +212,10 @@ tooltip label {
     color: @color8;
 }
 
+#language {
+    color: @accent-yellow;
+}
+
 #idle_inhibitor {
     color: @accent-orange;
 }
@@ -228,10 +232,6 @@ tooltip label {
 
 #custom-lock {
     color: @accent-orange;
-}
-
-#custom-keyboard {
-    color: @accent-yellow;
 }
 
 #custom-power {
