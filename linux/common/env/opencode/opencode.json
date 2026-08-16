@@ -31,7 +31,7 @@
                     "tools": true,
                     "limit": {
                         "context": 64000,
-                        "output": 4096
+                        "output": 16384
                     }
                 },
                 "qwen36-35b-a3b": {
@@ -57,11 +57,38 @@
                 "baseURL": "http://127.0.0.1:8001/v1"
             },
             "models": {
-                "unsloth/Qwen3.6-27B-NVFP4": {
+                "./unsloth/Qwen3.6-27B-NVFP4": {
+                    "name": "Qween 3.6 27B NVFP4",
+                    "modalities": {
+                        "input": [
+                            "text",
+                            "image"
+                        ],
+                        "output": [
+                            "text"
+                        ]
+                    },
                     "tools": true,
                     "limit": {
                         "context": 110000,
-                        "output": 8192
+                        "output": 32768
+                    }
+                },
+                "./unsloth/Qwen3.8-27B-NVFP4": {
+                    "name": "Qween 3.8 27B NVFP4",
+                    "modalities": {
+                        "input": [
+                            "text",
+                            "image"
+                        ],
+                        "output": [
+                            "text"
+                        ]
+                    },
+                    "tools": true,
+                    "limit": {
+                        "context": 110000,
+                        "output": 32768
                     }
                 }
             }
