@@ -1,5 +1,7 @@
 export ZSH="$HOME/.oh-my-zsh"
 
+ZSH_DISABLE_COMPFIX=true
+
 plugins=(
     git
     zsh-autosuggestions
