@@ -69,6 +69,7 @@
             }
         }
     },
-    "theme": "dark"
+    "theme": "dark",
+    "remoteControlAtStartup": false
 }
 

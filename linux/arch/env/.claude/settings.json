@@ -64,5 +64,6 @@
         "lua-lsp@claude-plugins-official": true,
         "rust-analyzer-lsp@claude-plugins-official": true
     },
-    "theme": "dark"
+    "theme": "dark",
+    "remoteControlAtStartup": false
 }

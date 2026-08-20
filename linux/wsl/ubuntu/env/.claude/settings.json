@@ -96,5 +96,6 @@
     "rust-analyzer-lsp@claude-plugins-official": true,
     "session-report@claude-plugins-official": true
   },
-  "theme": "dark"
+  "theme": "dark",
+  "remoteControlAtStartup": false
 }
