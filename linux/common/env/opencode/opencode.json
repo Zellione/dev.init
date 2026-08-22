@@ -13,10 +13,10 @@
     },
     "mode": {
         "plan": {
-            "model": "opencode-go/kimi-k2.6"
+            "model": "opencode-go/deepseek-v4-pro"
         },
         "build": {
-            "model": "opencode-go/deepseek-v4-pro"
+            "model": "opencode-go/deepseek-v4-flash"
         }
     },
     "provider": {
