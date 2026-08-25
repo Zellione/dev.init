@@ -147,13 +147,14 @@
     },
 
     "keyboard-state": {
+        "device-path": "/dev/input/by-path/platform-i8042-serio-0-event-kbd",
         "capslock": true,
         "format": {
             "numlock": "N {icon}",
-            "capslock": "󰪛 {icon}"
+            "capslock": "{icon}"
         },
         "format-icons": {
-            "locked": "",
+            "locked": "󰪛",
             "unlocked": ""
         }
     },
