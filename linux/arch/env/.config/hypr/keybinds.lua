@@ -54,6 +54,7 @@ hl.bind(mainMod .. " + SHIFT + G",    hl.dsp.exec_cmd(scriptsDir .. "/game_mode.
 -- hl.bind(mainMod .. " + ALT + L",   hl.dsp.exec_cmd(scriptsDir .. "/change_layout.sh"))
 hl.bind(mainMod .. " + ALT + V",      hl.dsp.exec_cmd(scriptsDir .. "/clip_manager.sh"))
 hl.bind(mainMod .. " + SHIFT + N",    hl.dsp.exec_cmd("swaync-client -t -sw"))
+hl.bind(mainMod .. " + ALT + I",      hl.dsp.exec_cmd(scriptsDir .. "/suspend_timer.sh --toggle"))
 -- NOTE: no bind for the de/us switch. xkb handles Alt+Shift itself via
 -- input.kb_options = "grp:alt_shift_toggle" (see input.lua). Binding the same
 -- chord to a script on top of that toggled the layout twice per press.

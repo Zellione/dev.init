@@ -8,6 +8,7 @@ PACKAGES=(
     hyprland
     hyprlock
     hypridle
+    swayidle
     xdg-desktop-portal-hyprland
     xdg-desktop-portal
     xdg-utils

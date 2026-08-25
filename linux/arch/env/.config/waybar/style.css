@@ -126,6 +126,7 @@ tooltip label {
 #custom-lock,
 #custom-power,
 #custom-swaync,
+#custom-suspend_timer,
 #custom-weather {
     padding: 4px 6px;
 }
@@ -244,6 +245,21 @@ tooltip label {
 
 #custom-swaync {
     color: @accent-pink;
+}
+
+#custom-suspend_timer {
+    color: @accent-green;
+    min-width: 58px;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+#custom-suspend_timer:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+#custom-suspend_timer.disabled {
+    color: @critical;
 }
 
 #custom-cava_mviz {

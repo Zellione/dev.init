@@ -50,6 +50,7 @@ yad --width=$dynamic_width --height=$dynamic_height \
 " ALT B" "Choose waybar layout" "(waybar layout)" \
 " ALT R" "Reload Waybar swaync Rofi" "CHECK NOTIFICATION FIRST!!!" \
 " SHIFT N" "Launch Notification Panel" "swaync Notification Center" \
+" ALT I" "Toggle automatic suspend timer" "45-minute idle timer" \
 " Print" "screenshot" "(grim)" \
 " Shift Print" "screenshot region" "(grim + slurp)" \
 " Shift S" "screenshot region" "(swappy)" \
@@ -68,5 +69,4 @@ yad --width=$dynamic_width --height=$dynamic_height \
 " E" "View or EDIT Keybinds, Settings, Monitor" "" \
 "" "" "" \
 "More tips:" "https://github.com/JaKooLit/Hyprland-Dots/wiki" ""\
-
 

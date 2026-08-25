@@ -1,0 +1,14 @@
+[Unit]
+Description=Track Wayland idle time for the suspend countdown
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swayidle -w timeout 1 "%h/.config/hypr/scripts/suspend_timer.sh --idle" resume "%h/.config/hypr/scripts/suspend_timer.sh --active"
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=10
+
+[Install]
+WantedBy=graphical-session.target

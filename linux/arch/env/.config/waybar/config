@@ -22,6 +22,7 @@
 
     "modules-center": [
         "idle_inhibitor",
+        "custom/suspend_timer",
         "clock",
         "custom/lock",
         "custom/swaync"

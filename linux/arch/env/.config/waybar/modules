@@ -341,6 +341,16 @@
         "escape": true
     },
 
+    "custom/suspend_timer": {
+        "return-type": "json",
+        "format": "{}",
+        "exec": "~/.config/hypr/scripts/suspend_timer.sh --status",
+        "interval": 10,
+        "signal": 8,
+        "tooltip": true,
+        "on-click": "~/.config/hypr/scripts/suspend_timer.sh --toggle"
+    },
+
     "custom/weather": {
         "format": "{}",
         "format-alt": "{alt}: {}",
