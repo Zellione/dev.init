@@ -28,5 +28,6 @@ tmux=$(which tmux)
 alias tmux="$tmux -2"
 
 alias claude="systemd-inhibit --what=idle --who=\"claude\" --why=\"running claude\" claude"
+alias opencode="systemd-inhibit --what=idle --who=\"opencode\" --why=\"running opencode\" opencode"
 
 export VCPKG_ROOT=/home/zellione/tools/vcpkg
