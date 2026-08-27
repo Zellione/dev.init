@@ -119,6 +119,33 @@
                     "reasoning": true
                 }
             }
+        },
+        "LLama.cpp Network": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "Local Llama Main 5090",
+            "options": {
+                "baseURL": "http://192.168.2.39:8080/v1"
+            },
+            "models": {
+                "unsloth/Qwen3.6-GGUF-MTP-27B": {
+                    "name": "Local Qwen 3.8 MTP 27B GGUF Uncensored",
+                    "modalities": {
+                        "input": [
+                            "text",
+                            "image"
+                        ],
+                        "output": [
+                            "text"
+                        ]
+                    },
+                    "limit": {
+                        "context": 200000,
+                        "output": 32768
+                    },
+                    "tool_call": true,
+                    "reasoning": true
+                }
+            }
         }
     },
     "mcp": {
