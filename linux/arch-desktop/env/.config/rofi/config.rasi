@@ -1,0 +1,7 @@
+configuration {
+    font: "JetBrainsMono Nerd Font 18";
+
+    hover-select: true;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+}

@@ -1,0 +1,13 @@
+@import "launcher.rasi"
+
+window {
+    width: 760px;
+}
+
+inputbar {
+    enabled: false;
+}
+
+listview {
+    lines: 4;
+}

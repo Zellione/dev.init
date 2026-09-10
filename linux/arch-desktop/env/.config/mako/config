@@ -1,0 +1,33 @@
+font=JetBrainsMono Nerd Font 11
+
+width=360
+height=120
+margin=18,10,10
+padding=12
+
+anchor=top-right
+
+background-color=#0c0c10ee
+text-color=#d8dee9ff
+border-color=#7dd3fc8c
+border-size=2
+border-radius=8
+
+default-timeout=5000
+
+icons=1
+max-icon-size=48
+
+[urgency=low]
+border-color=#7f849c66
+default-timeout=3000
+
+[urgency=normal]
+border-color=#7dd3fc8c
+default-timeout=5000
+
+[urgency=critical]
+border-color=#bf616aff
+text-color=#ffffffff
+default-timeout=0
+on-notify=exec pw-play /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga

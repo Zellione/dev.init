@@ -1,0 +1,28 @@
+@import "launcher.rasi"
+
+* {
+    font: "JetBrainsMono Nerd Font 16";
+}
+
+window {
+    width: 1100px;
+}
+
+entry {
+    placeholder: "Search clipboard...";
+}
+
+listview {
+    lines: 8;
+    columns: 1;
+    spacing: 6px;
+}
+
+element {
+    padding: 8px 10px;
+    spacing: 14px;
+}
+
+element-icon {
+    size: 120px;
+}

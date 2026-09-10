@@ -1,0 +1,186 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "lsp": true,
+    "agent": {
+        "plan": {
+            "tools": {
+                "write": false,
+                "edit": false,
+                "patch": false,
+                "bash": false
+            }
+        }
+    },
+    "mode": {
+        "plan": {
+            "model": "opencode-go/deepseek-v4-pro"
+        },
+        "build": {
+            "model": "opencode-go/deepseek-v4-flash"
+        }
+    },
+    "provider": {
+        "local-wsl-llama": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "Local WSL Llama",
+            "options": {
+                "baseURL": "http://127.0.0.1:8001/v1"
+            },
+            "models": {
+                "qwen36-27b": {
+                    "tools": true,
+                    "limit": {
+                        "context": 64000,
+                        "output": 16384
+                    }
+                },
+                "qwen36-35b-a3b": {
+                    "tools": true,
+                    "limit": {
+                        "context": 262144,
+                        "output": 8192
+                    }
+                },
+                "qwen25-coder-14b-instruct": {
+                    "tools": true,
+                    "limit": {
+                        "context": 32768,
+                        "output": 4096
+                    }
+                }
+            }
+        },
+        "local-wsl-vllm": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "Local WSL vLLM",
+            "options": {
+                "baseURL": "http://127.0.0.1:8001/v1"
+            },
+            "models": {
+                "./unsloth/Qwen3.6-27B-NVFP4": {
+                    "name": "Qween 3.6 27B NVFP4",
+                    "modalities": {
+                        "input": [
+                            "text",
+                            "image"
+                        ],
+                        "output": [
+                            "text"
+                        ]
+                    },
+                    "tools": true,
+                    "limit": {
+                        "context": 110000,
+                        "output": 32768
+                    }
+                },
+                "./unsloth/Qwen3.8-27B-NVFP4": {
+                    "name": "Qween 3.8 27B NVFP4",
+                    "modalities": {
+                        "input": [
+                            "text",
+                            "image"
+                        ],
+                        "output": [
+                            "text"
+                        ]
+                    },
+                    "tools": true,
+                    "limit": {
+                        "context": 110000,
+                        "output": 32768
+                    }
+                }
+            }
+        },
+        "Llama.cpp Local": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "Local Llama",
+            "options": {
+                "baseURL": "http://127.0.0.1:8080/v1"
+            },
+            "models": {
+                "unsloth/Qwen3.6-GGUF-MTP-27B": {
+                    "name": "Local Qwen 3.6 MTP 27B GGUF",
+                    "modalities": {
+                        "input": [
+                            "text",
+                            "image"
+                        ],
+                        "output": [
+                            "text"
+                        ]
+                    },
+                    "limit": {
+                        "context": 200000,
+                        "output": 32768
+                    },
+                    "tool_call": true,
+                    "reasoning": true
+                },
+                "qwen3.8-flash-next-iq3_xxs": {
+                    "name": "Local Qwen 3.8 Flash Next IQ3 XXS",
+                    "modalities": {
+                        "input": [
+                            "text"
+                        ],
+                        "output": [
+                            "text"
+                        ]
+                    },
+                    "limit": {
+                        "context": 65536,
+                        "output": 32768
+                    },
+                    "tool_call": true,
+                    "reasoning": true
+                }
+            }
+        },
+        "LLama.cpp Network": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "Local Llama Main 5090",
+            "options": {
+                "baseURL": "http://192.168.2.39:8080/v1"
+            },
+            "models": {
+                "unsloth/Qwen3.6-GGUF-MTP-27B": {
+                    "name": "Local Qwen 3.8 MTP 27B GGUF Uncensored",
+                    "modalities": {
+                        "input": [
+                            "text",
+                            "image"
+                        ],
+                        "output": [
+                            "text"
+                        ]
+                    },
+                    "limit": {
+                        "context": 200000,
+                        "output": 32768
+                    },
+                    "tool_call": true,
+                    "reasoning": true
+                }
+            }
+        }
+    },
+    "mcp": {
+        "sonarqube": {
+            "type": "local",
+            "enabled": true,
+            "command": [
+                "docker",
+                "run",
+                "-i",
+                "--rm",
+                "-e",
+                "SONARQUBE_TOKEN={file:./secrets/sq_token}",
+                "-e",
+                "SONARQUBE_ORG={file:./secrets/sq_company}",
+                "mcp/sonarqube"
+            ]
+        }
+    },
+    "model": "qwen36-27b"
+}

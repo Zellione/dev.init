@@ -1,0 +1,13 @@
+@import "launcher.rasi"
+
+window {
+    width: 760px;
+}
+
+entry {
+    placeholder: "Search notifications...";
+}
+
+listview {
+    lines: 6;
+}
