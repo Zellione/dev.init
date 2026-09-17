@@ -1,0 +1,585 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+GPU_ID="10de:2c05"
+AUDIO_ID="10de:22e9"
+
+GPU=""
+AUDIO=""
+GPU_SYS=""
+AUDIO_SYS=""
+
+find_pci_device() {
+    local wanted="$1"
+    local dev vendor device id
+    local found=""
+
+    for dev in /sys/bus/pci/devices/*; do
+        [[ -r "$dev/vendor" && -r "$dev/device" ]] || continue
+
+        vendor="$(<"$dev/vendor")"
+        device="$(<"$dev/device")"
+        id="${vendor#0x}:${device#0x}"
+
+        if [[ "$id" == "$wanted" ]]; then
+            [[ -z "$found" ]] ||
+                die "Multiple PCI devices found for ID $wanted."
+
+            found="$(basename "$dev")"
+        fi
+    done
+
+    printf '%s' "$found"
+}
+
+require_no_compute_processes() {
+    [[ "$(driver_of "$GPU")" == "nvidia" ]] || return
+
+    command -v nvidia-smi >/dev/null 2>&1 ||
+        die "nvidia-smi not found; refusing to unbind NVIDIA."
+
+    local uuid processes
+
+    uuid="$(
+        nvidia-smi \
+            --query-gpu=pci.bus_id,uuid \
+            --format=csv,noheader,nounits |
+        awk -F', *' -v pci="$GPU" '
+            BEGIN {
+                sub(/^[^:]*:/, "", pci)
+                pci = tolower(pci)
+            }
+            {
+                bus = $1
+                sub(/^[^:]*:/, "", bus)
+                bus = tolower(bus)
+        
+                if (bus == pci) {
+                    print $2
+                    exit
+                }
+            }
+        '
+    )"
+
+    [[ -n "$uuid" ]] ||
+        die "Could not determine NVIDIA UUID for GPU $GPU."
+
+    processes="$(
+        nvidia-smi \
+            --query-compute-apps=gpu_uuid,pid,process_name \
+            --format=csv,noheader,nounits 2>/dev/null |
+        awk -F', *' -v uuid="$uuid" '
+            $1 == uuid {
+                printf "PID %-8s %s\n", $2, $3
+            }
+        '
+    )"
+
+    if [[ -n "$processes" ]]; then
+        printf >&2 "Active compute processes on the eGPU:\n%s\n" "$processes"
+        die "Refusing to unbind the eGPU while CUDA/compute is active."
+    fi
+}
+
+detect_devices() {
+    GPU="$(find_pci_device "$GPU_ID")"
+    AUDIO="$(find_pci_device "$AUDIO_ID")"
+
+    if [[ -n "$GPU" ]]; then
+        GPU_SYS="/sys/bus/pci/devices/$GPU"
+    else
+        GPU_SYS=""
+    fi
+
+    if [[ -n "$AUDIO" ]]; then
+        AUDIO_SYS="/sys/bus/pci/devices/$AUDIO"
+    else
+        AUDIO_SYS=""
+    fi
+}
+
+validate_devices() {
+    # Both functions must either exist together or be absent together.
+    if [[ -z "$GPU" && -z "$AUDIO" ]]; then
+        return
+    fi
+
+    [[ -n "$GPU" ]] ||
+        die "GPU audio function exists, but GPU function is missing."
+
+    [[ -n "$AUDIO" ]] ||
+        die "GPU exists, but audio function is missing."
+
+    local gpu_slot audio_slot
+
+    gpu_slot="${GPU%.*}"
+    audio_slot="${AUDIO%.*}"
+
+    [[ "$gpu_slot" == "$audio_slot" ]] ||
+        die "GPU ($GPU) and audio ($AUDIO) do not belong to the same PCI device."
+
+    [[ "${GPU##*.}" == "0" ]] ||
+        die "Expected GPU at PCI function 0, found $GPU."
+
+    [[ "${AUDIO##*.}" == "1" ]] ||
+        die "Expected audio at PCI function 1, found $AUDIO."
+}
+
+find_gpu_parent_bridge() {
+    [[ -n "$GPU_SYS" && -e "$GPU_SYS" ]] ||
+        die "GPU is not present."
+
+    local gpu_path parent bridge
+
+    gpu_path="$(readlink -f "$GPU_SYS")"
+    parent="$(dirname "$gpu_path")"
+    bridge="$(basename "$parent")"
+
+    [[ "$bridge" =~ ^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-7]$ ]] ||
+        die "Could not determine GPU parent PCI bridge."
+
+    [[ -e "/sys/bus/pci/devices/$bridge/remove" ]] ||
+        die "GPU parent $bridge does not support PCI remove."
+
+    #
+    # Safety check: the detected GPU must actually be directly below
+    # the bridge we are about to remove.
+    #
+    [[ "$(dirname "$gpu_path")" == "$(readlink -f "/sys/bus/pci/devices/$bridge")" ]] ||
+        die "GPU topology validation failed."
+
+    printf '%s' "$bridge"
+}
+
+USB4=""
+USB4_VENDOR="ASMedia"
+USB4_DEVICE="246x"
+
+detect_usb4() {
+    local dev vendor name
+    local found=""
+
+    for dev in /sys/bus/thunderbolt/devices/*; do
+        [[ -r "$dev/vendor_name" && -r "$dev/device_name" ]] || continue
+
+        vendor="$(<"$dev/vendor_name")"
+        name="$(<"$dev/device_name")"
+
+        if [[ "$vendor" == "$USB4_VENDOR" && "$name" == "$USB4_DEVICE" ]]; then
+            [[ -z "$found" ]] ||
+                die "Multiple matching USB4 devices found; refusing to guess."
+
+            found="$dev"
+        fi
+    done
+
+    USB4="$found"
+}
+
+NVIDIA_DRIVER="/sys/bus/pci/drivers/nvidia"
+VFIO_DRIVER="/sys/bus/pci/drivers/vfio-pci"
+
+die() {
+    echo "ERROR: $*" >&2
+    exit 1
+}
+
+VM="win10-vrchat-avatar"
+
+vm_running() {
+    command -v virsh >/dev/null 2>&1 || return 1
+
+    [[ "$(virsh -c qemu:///system domstate "$VM" 2>/dev/null || true)" == "running" ]]
+}
+
+require_vm_stopped() {
+    if vm_running; then
+        die "VM '$VM' is running. Shut it down before changing the eGPU state."
+    fi
+}
+
+OPENLINKHUB_WAS_ACTIVE=0
+
+stop_openlinkhub() {
+    OPENLINKHUB_WAS_ACTIVE=0
+
+    if systemctl --user is-active --quiet openlinkhub.service 2>/dev/null; then
+        OPENLINKHUB_WAS_ACTIVE=1
+        echo "Temporarily stopping OpenLinkHub..."
+        systemctl --user stop openlinkhub.service
+    fi
+
+    if sudo systemctl is-active --quiet openlinkhub.service 2>/dev/null; then
+        OPENLINKHUB_WAS_ACTIVE=2
+        echo "Temporarily stopping system OpenLinkHub..."
+        sudo systemctl stop openlinkhub.service
+    fi
+}
+
+restore_openlinkhub() {
+    case "$OPENLINKHUB_WAS_ACTIVE" in
+        1)
+            echo "Restarting OpenLinkHub..."
+            systemctl --user start openlinkhub.service
+            ;;
+        2)
+            echo "Restarting system OpenLinkHub..."
+            sudo systemctl start openlinkhub.service
+            ;;
+    esac
+
+    OPENLINKHUB_WAS_ACTIVE=0
+}
+
+driver_of() {
+    local dev="$1"
+
+    if [[ -z "$dev" || ! -e "/sys/bus/pci/devices/$dev" ]]; then
+        echo "absent"
+        return
+    fi
+
+    if [[ -L "/sys/bus/pci/devices/$dev/driver" ]]; then
+        basename "$(readlink "/sys/bus/pci/devices/$dev/driver")"
+    else
+        echo "unbound"
+    fi
+}
+
+usb4_authorized() {
+    if [[ -z "$USB4" || ! -r "$USB4/authorized" ]]; then
+        echo "absent"
+        return
+    fi
+
+    cat "$USB4/authorized"
+}
+
+state() {
+    local gpu audio auth
+
+    gpu="$(driver_of "$GPU")"
+    audio="$(driver_of "$AUDIO")"
+    auth="$(usb4_authorized)"
+
+    if [[ "$gpu" == "absent" && "$audio" == "absent" ]]; then
+        case "$auth" in
+            0)
+                echo "off-ready"
+                ;;
+            absent)
+                echo "off"
+                ;;
+            *)
+                echo "inconsistent"
+                ;;
+        esac
+        return
+    fi
+
+    if [[ "$gpu" == "vfio-pci" && "$audio" == "vfio-pci" && "$auth" == "1" ]]; then
+        echo "vfio"
+        return
+    fi
+
+    if [[ "$gpu" == "nvidia" && "$audio" == "vfio-pci" && "$auth" == "1" ]]; then
+        echo "linux"
+        return
+    fi
+
+    echo "inconsistent"
+}
+
+show_status() {
+    local s gpu audio auth
+
+    s="$(state)"
+    gpu="$(driver_of "$GPU")"
+    audio="$(driver_of "$AUDIO")"
+    auth="$(usb4_authorized)"
+
+    local vm_state
+    
+    if vm_running; then
+        vm_state="running"
+    else
+        vm_state="stopped"
+    fi
+    
+    printf "State:        %s\n" "$s"
+    printf "VM:           %s\n" "$vm_state"
+    printf "GPU:          %s\n" "$gpu"
+    printf "Audio:        %s\n" "$audio"
+    printf "USB4 auth:    %s\n" "$auth"
+
+    if command -v boltctl >/dev/null 2>&1; then
+        echo
+        boltctl list 2>/dev/null || true
+    fi
+
+    if [[ -n "$GPU" ]]; then
+        echo "GPU PCI:      $GPU"
+        echo "Audio PCI:    $AUDIO"
+        echo "Parent:       $(find_gpu_parent_bridge)"
+    fi
+}
+
+to_linux() {
+    local s
+    s="$(state)"
+
+    case "$s" in
+        linux)
+            echo "Already in Linux/NVIDIA state."
+            return
+            ;;
+        vfio)
+            ;;
+        off-ready)
+            die "eGPU is detached but still powered on. Power-cycle the AG02 to re-enumerate it."
+            ;;
+        off)
+            die "eGPU is off/disconnected. Power on the AG02 first and wait for USB4 enumeration."
+            ;;
+        *)
+            die "Refusing transition from inconsistent state."
+            ;;
+    esac
+
+    require_vm_stopped
+
+    echo "Resetting GPU under VFIO..."
+    echo flr | sudo tee "$GPU_SYS/reset_method" >/dev/null
+    echo 1   | sudo tee "$GPU_SYS/reset" >/dev/null
+    
+    echo "Unbinding GPU from VFIO..."
+    echo "$GPU" | sudo tee "$VFIO_DRIVER/unbind" >/dev/null
+    
+    echo "Binding GPU to NVIDIA..."
+    echo nvidia | sudo tee "$GPU_SYS/driver_override" >/dev/null
+    
+    if ! echo "$GPU" | sudo tee "$NVIDIA_DRIVER/bind" >/dev/null; then
+        die "NVIDIA bind failed. GPU has been left in its current state; inspect with: egpu status"
+    fi
+
+    [[ "$(driver_of "$GPU")" == "nvidia" ]] ||
+        die "GPU did not enter NVIDIA state."
+
+    echo
+    echo "eGPU is ready for Linux CUDA."
+}
+
+to_vfio() {
+    local s
+    s="$(state)"
+
+    case "$s" in
+        vfio)
+            echo "Already in VFIO state."
+            return
+            ;;
+        linux)
+            ;;
+        off-ready)
+            die "eGPU is detached but still powered on. Power-cycle the AG02 to re-enumerate it."
+            ;;
+        off)
+            die "eGPU is off/disconnected. Power on the AG02 first."
+            ;;
+        *)
+            die "Refusing transition from inconsistent state."
+            ;;
+    esac
+
+    require_vm_stopped
+    require_no_compute_processes
+    stop_openlinkhub
+
+    local rc=0
+    
+    echo "Unbinding GPU from NVIDIA..."
+    echo "$GPU" | sudo tee "$NVIDIA_DRIVER/unbind" >/dev/null || rc=$?
+    
+    if (( rc == 0 )) && [[ "$(driver_of "$GPU")" != "unbound" ]]; then
+        echo "ERROR: NVIDIA unbind did not complete." >&2
+        rc=1
+    fi
+    
+    if (( rc == 0 )); then
+        echo "Binding GPU to VFIO..."
+        echo vfio-pci | sudo tee "$GPU_SYS/driver_override" >/dev/null || rc=$?
+    fi
+    
+    if (( rc == 0 )); then
+        echo "$GPU" | sudo tee "$VFIO_DRIVER/bind" >/dev/null || rc=$?
+    fi
+    
+    if (( rc == 0 )) && [[ "$(driver_of "$GPU")" != "vfio-pci" ]]; then
+        echo "ERROR: GPU did not enter VFIO state." >&2
+        rc=1
+    fi
+    
+    if (( rc == 0 )) && [[ "$(driver_of "$AUDIO")" != "vfio-pci" ]]; then
+        echo "ERROR: Audio function is not bound to VFIO." >&2
+        rc=1
+    fi
+    
+    restore_openlinkhub
+    
+    (( rc == 0 )) || die "Failed to transition eGPU from NVIDIA to VFIO."
+    
+    echo
+    echo "eGPU is ready for Windows/VFIO."
+}
+
+to_off() {
+    local s
+    s="$(state)"
+
+    require_vm_stopped
+
+    case "$s" in
+        linux)
+            to_vfio
+            ;;
+        vfio)
+            ;;
+        off-ready)
+            echo "eGPU is already safely detached."
+            echo "It is safe to physically power off the AG02."
+            return
+            ;;
+        off)
+            echo "eGPU is already removed/disconnected."
+            return
+            ;;
+        *)
+            die "Refusing transition from inconsistent state."
+            ;;
+    esac
+
+    [[ "$(driver_of "$GPU")" == "vfio-pci" ]] ||
+        die "GPU is not safely owned by VFIO."
+
+    [[ "$(driver_of "$AUDIO")" == "vfio-pci" ]] ||
+        die "Audio function is not safely owned by VFIO."
+
+    #
+    # Our tested topology:
+    #
+    # 16:00.0 ASM4242 downstream port
+    #   17:00.0 ASMedia 2461
+    #     18:00.0 ASMedia 2461
+    #       19:00.0 RTX 5070 Ti
+    #       19:00.1 HDA
+    #
+    local bridge downstream
+    
+    bridge="$(find_gpu_parent_bridge)"
+    downstream="/sys/bus/pci/devices/$bridge"
+    
+    echo "Detected eGPU parent bridge: $bridge"
+
+    echo "Removing eGPU PCIe downstream hierarchy..."
+    echo 1 | sudo tee "$downstream/remove" >/dev/null
+
+    sleep 1
+
+    if [[ -e "$GPU_SYS" || -e "$AUDIO_SYS" ]]; then
+        die "GPU/audio still present after PCIe remove. Do NOT power off the AG02."
+    fi
+
+    [[ -e "$USB4/authorized" ]] ||
+        die "USB4 device disappeared unexpectedly. Check state before powering off."
+
+    echo "Deauthorizing USB4 device..."
+    echo 0 | sudo tee "$USB4/authorized" >/dev/null
+
+    sleep 1
+
+    if [[ -e "$GPU_SYS" || -e "$AUDIO_SYS" ]]; then
+        die "PCIe devices reappeared. Do NOT power off the AG02."
+    fi
+
+    if [[ "$(cat "$USB4/authorized" 2>/dev/null || echo 0)" != "0" ]]; then
+        die "USB4 device is still authorized. Do NOT power off the AG02."
+    fi
+
+    echo
+    echo "eGPU PCIe hierarchy removed and USB4 deauthorized."
+    echo "It is now safe to physically power off the AG02."
+}
+
+to_windows() {
+    local s
+    s="$(state)"
+
+    if vm_running; then
+        echo "Windows VM '$VM' is already running."
+        return
+    fi
+
+    case "$s" in
+        linux|vfio)
+            ;;
+        off-ready)
+            die "eGPU is detached but still powered on. Power-cycle the AG02 first."
+            ;;
+        off)
+            die "eGPU is powered off/disconnected. Power on the AG02 first."
+            ;;
+        *)
+            die "Refusing Windows start from inconsistent eGPU state."
+            ;;
+    esac
+
+    #
+    # to_vfio() itself checks that the VM is stopped.
+    #
+    to_vfio
+
+    [[ "$(state)" == "vfio" ]] ||
+        die "eGPU did not reach VFIO state."
+
+    echo "Starting Windows VM '$VM'..."
+
+    virsh -c qemu:///system start "$VM"
+
+    if ! vm_running; then
+        die "VM start returned, but '$VM' is not running."
+    fi
+
+    echo
+    echo "Windows VM is running with the eGPU."
+}
+
+usage() {
+    echo "Usage: egpu {status|linux|vfio|windows|off}"
+}
+
+detect_devices
+validate_devices
+detect_usb4
+
+case "${1:-}" in
+    status)
+        show_status
+        ;;
+    linux)
+        to_linux
+        ;;
+    vfio)
+        to_vfio
+        ;;
+    windows)
+        to_windows
+        ;;
+    off)
+        to_off
+        ;;
+    *)
+        usage
+        exit 2
+        ;;
+esac
