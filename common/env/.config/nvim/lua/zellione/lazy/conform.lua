@@ -8,7 +8,7 @@ return {
 		},
 		formatters_by_ft = {
 			lua = { "trim_whitespace", "stylua" },
-			python = { "trim_whitespace", "isort", "black" },
+			python = { "isort", "black", stop_after_first = true },
 			javascript = { "trim_whitespace", "prettierd", "prettier", stop_after_first = true },
 			typescript = { "trim_whitespace", "prettierd", "prettier", stop_after_first = true },
 			html = { "trim_whitespace", "prettierd", "prettier", stop_after_first = true },
