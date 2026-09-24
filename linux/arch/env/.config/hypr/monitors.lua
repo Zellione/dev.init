@@ -7,7 +7,7 @@
 
 -- Fallback rule: any monitor not matched below gets preferred
 -- resolution, auto-positioned, scale 1.
-hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
+hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1.4 })
 
 -- Bind workspace 1 to the internal display by default
 hl.workspace_rule({ workspace = "1", monitor = "eDP-1", default = true })
