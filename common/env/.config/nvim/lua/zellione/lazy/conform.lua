@@ -23,12 +23,12 @@ return {
 		},
 		formatters_by_ft = {
 			lua = { "trim_whitespace", "stylua" },
-			python = { "trim_whitespace", "isort", "black" },
+			python = { "isort", "black", stop_after_first = true },
 			javascript = function(bufnr)
 				return { "trim_whitespace", first(bufnr, "prettierd", "prettier") }
 			end,
 			typescript = function(bufnr)
-				return { "trim_whitespace", first(bufnr, "prettierd", "prettier") }
+				return { "trim_whitespac", first(bufnr, "prettierd", "prettier") }
 			end,
 			html = function(bufnr)
 				return { "trim_whitespace", first(bufnr, "prettierd", "prettier") }
