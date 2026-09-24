@@ -23,18 +23,21 @@ require("keybinds")
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 hl.monitor({
-    output   = "DP-3",
-    mode     = "2560x1440@240",
+    output = "DP-3",
+    mode = "2560x1440@240",
     position = "0x0",
-    scale    = "1",
+    scale = 1,
     bitdepth = 10,
-    cm	     = "auto",
-    vrr      = 2,
+    cm = "hdr",
+    sdrbrightness = 1.0,
+    sdrsaturation = 1.1,
+    sdr_min_luminance = 0.005,
+    sdr_max_luminance = 200,
 })
 
 hl.monitor({
     output   = "DP-2",
-    mode     = "2560x1440@144",
+    mode     = "2560x1440@59.95",
     position = "2560x0",
     scale    = "1",
     vrr      = 0,
@@ -90,6 +93,7 @@ end)
 
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
+hl.env("AQ_DRM_DEVICES", "/dev/dri/rtx5090")
 
 
 -----------------------
@@ -256,6 +260,7 @@ hl.config({
         kb_model   = "",
         kb_options = "",
         kb_rules   = "",
+        numlock_by_default     = true,
 
         follow_mouse = 1,
 
@@ -297,6 +302,20 @@ hl.window_rule({
     no_focus = true,
 })
 
+hl.on("window.active", function(w)
+    local timeout = 0
+
+    if w ~= nil and w.class == "retroarch" then
+        timeout = 3
+    end
+
+    hl.config({
+        cursor = {
+            inactive_timeout = timeout,
+        },
+    })
+end)
+
 hl.workspace_rule({
     workspace = "1",
     monitor = "DP-3",
@@ -332,6 +351,13 @@ hl.window_rule({
         class = "heroic",
     },
     idle_inhibit = "none",
+})
+
+hl.window_rule({
+    match = {
+        class = "looking-glass-client",
+    },
+    no_vrr = true,
 })
 
 -- hl.window_rule({
