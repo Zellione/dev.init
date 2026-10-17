@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+set -u
+
+fix_window() {
+    local addr="$1"
+
+    python3 - "$addr" <<'PY'
+import json
+import subprocess
+import sys
+
+addr = sys.argv[1].removeprefix("0x")
+
+clients = json.loads(
+    subprocess.check_output(["hyprctl", "-j", "clients"], text=True)
+)
+monitors = json.loads(
+    subprocess.check_output(["hyprctl", "-j", "monitors"], text=True)
+)
+
+win = next(
+    (
+        w for w in clients
+        if str(w.get("address", "")).removeprefix("0x") == addr
+    ),
+    None,
+)
+
+if not win or not win.get("floating", False):
+    raise SystemExit
+
+x, y = win["at"]
+w, h = win["size"]
+
+def intersects(mon):
+    mx, my = mon["x"], mon["y"]
+    mw, mh = mon["width"], mon["height"]
+
+    return (
+        x < mx + mw
+        and x + w > mx
+        and y < my + mh
+        and y + h > my
+    )
+
+# Window has at least some visible area -> leave it alone.
+if any(intersects(mon) for mon in monitors):
+    raise SystemExit
+
+lua = f'''
+for _, w in pairs(hl.get_windows()) do
+    if tostring(w.address) == "0x{addr}" then
+        hl.dispatch(hl.dsp.window.center({{
+            window = w
+        }}))
+        break
+    end
+end
+'''
+
+subprocess.run(
+    ["hyprctl", "repl", lua],
+    check=False,
+)
+PY
+}
+
+# Repair windows that were already offscreen when this script started.
+while IFS= read -r addr; do
+    fix_window "$addr"
+done < <(
+    hyprctl -j clients |
+    jq -r '.[] | select(.floating == true) | .address'
+)
+
+socket="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
+
+socat -U - UNIX-CONNECT:"$socket" |
+while IFS= read -r line; do
+    case "$line" in
+        openwindow\>\>*)
+            data="${line#openwindow>>}"
+            addr="${data%%,*}"
+
+            # XWayland apps sometimes restore their own geometry shortly
+            # after the initial map.
+            sleep 0.15
+            fix_window "$addr"
+            ;;
+    esac
+done

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+IMAGE="project-maya:dual-ram12"
+NAME="project-maya-dual"
+MODELS="/data/models/project-maya"
+
+# Beide GPUs müssen unter NVIDIA verfügbar sein.
+for gpu in 0 1; do
+    if ! nvidia-smi -i "$gpu" \
+        --query-gpu=name \
+        --format=csv,noheader >/dev/null 2>&1; then
+        echo "GPU $gpu nicht verfügbar."
+        echo "eGPU-Status prüfen: egpu status"
+        exit 1
+    fi
+done
+
+if ! [[ -d "$MODELS/Maya-S-v2-IQ2_XXS/pack" ]]; then
+    echo "Model-Pack nicht gefunden: $MODELS"
+    exit 1
+fi
+
+exec docker run --rm -it \
+    --name "$NAME" \
+    --device nvidia.com/gpu=0 \
+    --device nvidia.com/gpu=1 \
+    --publish 127.0.0.1:8080:8080 \
+    --cap-drop ALL \
+    --security-opt no-new-privileges:true \
+    --pids-limit 512 \
+    --shm-size 2g \
+    --mount "type=bind,src=$MODELS,dst=/models" \
+    -e MAYA_UPDATE_CHECK=0 \
+    "$IMAGE" \
+    ./maya.sh \
+        --plain \
+        --config /opt/maya/maya-maya-s-v2-iq2_xxs.json \
+        --host 0.0.0.0 \
+        --port 8080

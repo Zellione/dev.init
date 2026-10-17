@@ -390,3 +390,10 @@ hl.window_rule({
 --         icon = "info",
 --     })
 -- end)
+
+hl.window_rule({
+    name = "center-wallpaper-picker",
+    match = { title = "^Wallpaper Picker$" },
+    float = true,
+    center = true,
+})

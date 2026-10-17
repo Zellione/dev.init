@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+
+set -u
+
+INDEX_MIC='alsa_input.usb-Valve_Corporation_Valve_VR_Radio___HMD_Mic_4DB389F183-LYM-01.mono-fallback'
+INDEX_SINK='alsa_output.pci-0000_01_00.1.hdmi-stereo-extra2'
+CORSAIR_MIC='alsa_input.usb-Corsair_CORSAIR_VIRTUOSO_Wireless_Gaming_Headset_167c6b05000400da-00.mono-fallback'
+CORSAIR_SINK='alsa_output.usb-Corsair_CORSAIR_VIRTUOSO_Wireless_Gaming_Headset_167c6b05000400da-00.analog-stereo'
+
+WIVRN_MIC='wivrn.source'
+WIVRN_SINK='wivrn.sink'
+
+log() {
+    echo "vr-audio-switch: $*"
+}
+
+source_exists() {
+    pactl list short sources |
+        awk '{print $2}' |
+        grep -Fxq "$1"
+}
+
+sink_exists() {
+    pactl list short sinks |
+        awk '{print $2}' |
+        grep -Fxq "$1"
+}
+
+steamvr_running() {
+    pgrep -x vrserver >/dev/null 2>&1
+}
+
+wivrn_connected() {
+    source_exists "$WIVRN_MIC" && sink_exists "$WIVRN_SINK"
+}
+
+set_source_if_needed() {
+    local target="$1"
+    local current
+
+    current="$(pactl get-default-source 2>/dev/null || true)"
+
+    if source_exists "$target" && [[ "$current" != "$target" ]]; then
+        log "setting default source -> $target"
+        pactl set-default-source "$target"
+    fi
+}
+
+set_sink_if_needed() {
+    local target="$1"
+    local current
+
+    current="$(pactl get-default-sink 2>/dev/null || true)"
+
+    if sink_exists "$target" && [[ "$current" != "$target" ]]; then
+        log "setting default sink -> $target"
+        pactl set-default-sink "$target"
+    fi
+}
+
+update_defaults() {
+    if wivrn_connected; then
+        log "WiVRn connected"
+        set_sink_if_needed "$WIVRN_SINK"
+        set_source_if_needed "$WIVRN_MIC"
+
+    elif steamvr_running; then
+        log "SteamVR running"
+        set_sink_if_needed "$INDEX_SINK"
+        set_source_if_needed "$INDEX_MIC"
+
+    else
+        log "no VR runtime active"
+        set_sink_if_needed "$CORSAIR_SINK"
+        set_source_if_needed "$CORSAIR_MIC"
+    fi
+}
+
+update_defaults
+
+pactl subscribe |
+while IFS= read -r event; do
+    case "$event" in
+        *"source"*|*"sink"*|*"server"*|*"card"*)
+            sleep 0.15
+            update_defaults
+            ;;
+    esac
+done &
+
+pulse_pid=$!
+
+last_state=""
+
+while true; do
+    if wivrn_connected; then
+        state="wivrn"
+    elif steamvr_running; then
+        state="steamvr"
+    else
+        state="desktop"
+    fi
+
+    if [[ "$state" != "$last_state" ]]; then
+        update_defaults
+        last_state="$state"
+    fi
+
+    sleep 1
+done
+
+wait "$pulse_pid"

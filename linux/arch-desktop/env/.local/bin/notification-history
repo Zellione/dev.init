@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+set -u
+
+mode="${1:-all}"
+
+case "$mode" in
+    critical)
+        history="$(makoctl history -j | jq '[.[] | select(.urgency == "critical")]')"
+        title="Notifications: critical"
+        ;;
+    normal)
+        history="$(makoctl history -j | jq '[.[] | select(.urgency == "normal")]')"
+        title="Notifications: normal"
+        ;;
+    all)
+        history="$(makoctl history -j)"
+        title="Notifications"
+        ;;
+    *)
+        notify-send "Notification Center" "Unknown filter: $mode"
+        exit 1
+        ;;
+esac
+
+count="$(jq 'length' <<<"$history")"
+
+if (( count == 0 )); then
+    notify-send "Notification Center" "Keine Benachrichtigungen für Filter: $mode"
+    exit 0
+fi
+
+entries="$(
+    jq -r '
+        .[] |
+        (
+            if .urgency == "critical" then "⚠"
+            elif .urgency == "normal" then "●"
+            else "○"
+            end
+        )
+        + "  "
+        + (.app_name // "unknown")
+        + " — "
+        + (.summary // "")
+        + (
+            if (.body // "") != ""
+            then " — " + ((.body // "") | gsub("\n"; " "))
+            else ""
+            end
+        )
+    ' <<<"$history"
+)"
+
+selection="$(
+    printf '%s\n' "$entries" |
+        rofi -dmenu \
+            -i \
+            -p "$title" \
+            -mesg "Enter: Details" \
+            -theme ~/.config/rofi/themes/notifications.rasi
+)" || exit 0
+
+index="$(
+    printf '%s\n' "$entries" |
+        grep -n -F -x -m1 -- "$selection" |
+        cut -d: -f1
+)"
+
+[[ -n "$index" ]] || exit 1
+index=$((index - 1))
+
+item="$(jq ".[$index]" <<<"$history")"
+
+id="$(jq -r '.id' <<<"$item")"
+app="$(jq -r '.app_name // ""' <<<"$item")"
+urgency="$(jq -r '.urgency // ""' <<<"$item")"
+summary="$(jq -r '.summary // ""' <<<"$item")"
+body="$(jq -r '.body // ""' <<<"$item")"
+
+detail="$(
+    printf 'App: %s\nUrgency: %s\nID: %s\n\n%s\n\n%s' \
+        "$app" "$urgency" "$id" "$summary" "$body"
+)"
+
+action="$(
+    printf '%s\n' \
+        "Copy full notification" \
+        "Copy body" \
+        "Copy summary" \
+        "Close" |
+        rofi -dmenu \
+            -p "$app" \
+            -mesg "$detail" \
+            -theme ~/.config/rofi/themes/notification-detail.rasi
+)" || exit 0
+
+case "$action" in
+    "Copy full notification")
+        printf '%s\n\n%s' "$summary" "$body" | wl-copy
+        notify-send "Notification Center" "Notification copied."
+        ;;
+
+    "Copy body")
+        printf '%s' "$body" | wl-copy
+        notify-send "Notification Center" "Body copied."
+        ;;
+
+    "Copy summary")
+        printf '%s' "$summary" | wl-copy
+        notify-send "Notification Center" "Summary copied."
+        ;;
+
+    *)
+        ;;
+esac

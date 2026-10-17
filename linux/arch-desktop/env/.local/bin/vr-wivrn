@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+
+OPENXR_DIR="$HOME/.config/openxr/1"
+WIVRN_JSON="/usr/share/openxr/1/openxr_wivrn.json"
+
+mkdir -p "$OPENXR_DIR"
+
+ln -sfn "$WIVRN_JSON" "$OPENXR_DIR/active_runtime.json"
+
+echo "VR mode: WiVRn"
+echo "OpenXR -> $(readlink -f "$OPENXR_DIR/active_runtime.json")"

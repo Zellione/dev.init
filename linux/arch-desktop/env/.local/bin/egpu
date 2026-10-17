@@ -153,8 +153,8 @@ find_gpu_parent_bridge() {
 }
 
 USB4=""
-USB4_VENDOR="ASMedia"
-USB4_DEVICE="246x"
+USB4_VENDOR="Razer"
+USB4_DEVICE="Core X V2"
 
 detect_usb4() {
     local dev vendor name
@@ -185,7 +185,7 @@ die() {
     exit 1
 }
 
-VM="win10-vrchat-avatar"
+VM="win11-vrchat"
 
 vm_running() {
     command -v virsh >/dev/null 2>&1 || return 1
@@ -337,10 +337,10 @@ to_linux() {
         vfio)
             ;;
         off-ready)
-            die "eGPU is detached but still powered on. Power-cycle the AG02 to re-enumerate it."
+            die "eGPU is detached but still powered on. Power-cycle the eGPU to re-enumerate it."
             ;;
         off)
-            die "eGPU is off/disconnected. Power on the AG02 first and wait for USB4 enumeration."
+            die "eGPU is off/disconnected. Power on the eGPU first and wait for USB4 enumeration."
             ;;
         *)
             die "Refusing transition from inconsistent state."
@@ -382,10 +382,10 @@ to_vfio() {
         linux)
             ;;
         off-ready)
-            die "eGPU is detached but still powered on. Power-cycle the AG02 to re-enumerate it."
+            die "eGPU is detached but still powered on. Power-cycle the eGPU to re-enumerate it."
             ;;
         off)
-            die "eGPU is off/disconnected. Power on the AG02 first."
+            die "eGPU is off/disconnected. Power on the eGPU first."
             ;;
         *)
             die "Refusing transition from inconsistent state."
@@ -433,6 +433,127 @@ to_vfio() {
     echo "eGPU is ready for Windows/VFIO."
 }
 
+wait_for_pcie_suspend() {
+    local timeout_ms=5000
+    local interval_ms=50
+    local elapsed=0
+    local dev path status
+    local -a devices=()
+
+    [[ -n "$GPU" && -n "$GPU_SYS" ]] ||
+        die "GPU/sysfs path unavailable while waiting for runtime suspend."
+
+    [[ -n "$AUDIO" ]] ||
+        die "Audio function unavailable while waiting for runtime suspend."
+
+    #
+    # Build the PCIe path dynamically from the GPU's sysfs path.
+    #
+    # Example:
+    #
+    #   .../0000:15:00.0/
+    #       0000:16:00.0/
+    #       0000:17:00.0/
+    #       0000:18:00.0/
+    #       0000:19:00.0
+    #
+    # We deliberately start at the JHL9480 upstream bridge, i.e. the
+    # grandparent of the GPU.  The preceding ASM4242 devices belong to
+    # the host controller and must not become part of the eGPU subtree.
+    #
+    local gpu_real
+    local gpu_parent
+    local egpu_root
+    
+    gpu_real="$(readlink -f "$GPU_SYS")" ||
+        die "Could not resolve GPU sysfs path."
+    
+    [[ -n "$gpu_real" && -d "$gpu_real" ]] ||
+        die "Resolved GPU sysfs path is invalid."
+
+    gpu_parent="$(dirname "$gpu_real")"
+    egpu_root="$(dirname "$gpu_parent")"
+
+    [[ -d "$gpu_parent" && -d "$egpu_root" ]] ||
+        die "Could not determine eGPU PCIe subtree."
+
+    #
+    # Collect every PCI device at or below the dynamic eGPU root.
+    # This includes all JHL9480 bridge functions plus GPU/audio.
+    #
+    while IFS= read -r path; do
+        dev="$(basename "$path")"
+
+        [[ "$dev" =~ ^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-7]$ ]] ||
+            continue
+
+        devices+=("$dev")
+    done < <(
+        find "$egpu_root" -type d \
+            -regextype posix-extended \
+            -regex '.*/[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-7]' \
+            -print
+    )
+
+    local found_gpu=0
+    local found_audio=0
+
+    for dev in "${devices[@]}"; do
+        [[ "$dev" == "$GPU" ]] && found_gpu=1
+        [[ "$dev" == "$AUDIO" ]] && found_audio=1
+    done
+
+    (( found_gpu )) ||
+        die "GPU $GPU is not part of detected eGPU PCIe subtree."
+
+    (( found_audio )) ||
+        die "Audio function $AUDIO is not part of detected eGPU PCIe subtree."
+
+    ((${#devices[@]} > 0)) ||
+        die "No PCI devices found in eGPU subtree."
+
+    echo "Waiting for eGPU PCIe subtree to suspend..."
+
+    while (( elapsed < timeout_ms )); do
+        local all_suspended=1
+
+        for dev in "${devices[@]}"; do
+            if [[ ! -r "/sys/bus/pci/devices/$dev/power/runtime_status" ]]; then
+                die "PCI device $dev disappeared while waiting for runtime suspend."
+            fi
+
+            status="$(<"/sys/bus/pci/devices/$dev/power/runtime_status")"
+
+            if [[ "$status" != "suspended" ]]; then
+                all_suspended=0
+                break
+            fi
+        done
+
+        if (( all_suspended )); then
+            echo "eGPU PCIe subtree is suspended."
+            return
+        fi
+
+        sleep 0.05
+        elapsed=$((elapsed + interval_ms))
+    done
+
+    echo "ERROR: eGPU PCIe subtree did not suspend within 5 seconds." >&2
+
+    for dev in "${devices[@]}"; do
+        if [[ -r "/sys/bus/pci/devices/$dev/power/runtime_status" ]]; then
+            printf >&2 "  %-12s %s\n" \
+                "$dev" \
+                "$(<"/sys/bus/pci/devices/$dev/power/runtime_status")"
+        else
+            printf >&2 "  %-12s missing\n" "$dev"
+        fi
+    done
+
+    die "Refusing USB4 deauthorization."
+}
+
 to_off() {
     local s
     s="$(state)"
@@ -447,11 +568,11 @@ to_off() {
             ;;
         off-ready)
             echo "eGPU is already safely detached."
-            echo "It is safe to physically power off the AG02."
+            echo "It is safe to physically power off the eGPU."
             return
             ;;
         off)
-            echo "eGPU is already removed/disconnected."
+            echo "eGPU is already powered off/disconnected."
             return
             ;;
         *)
@@ -465,50 +586,38 @@ to_off() {
     [[ "$(driver_of "$AUDIO")" == "vfio-pci" ]] ||
         die "Audio function is not safely owned by VFIO."
 
-    #
-    # Our tested topology:
-    #
-    # 16:00.0 ASM4242 downstream port
-    #   17:00.0 ASMedia 2461
-    #     18:00.0 ASMedia 2461
-    #       19:00.0 RTX 5070 Ti
-    #       19:00.1 HDA
-    #
-    local bridge downstream
-    
-    bridge="$(find_gpu_parent_bridge)"
-    downstream="/sys/bus/pci/devices/$bridge"
-    
-    echo "Detected eGPU parent bridge: $bridge"
+    wait_for_pcie_suspend
 
-    echo "Removing eGPU PCIe downstream hierarchy..."
-    echo 1 | sudo tee "$downstream/remove" >/dev/null
+    [[ -n "$USB4" && -e "$USB4/authorized" ]] ||
+        die "USB4 device is not available for deauthorization."
 
-    sleep 1
-
-    if [[ -e "$GPU_SYS" || -e "$AUDIO_SYS" ]]; then
-        die "GPU/audio still present after PCIe remove. Do NOT power off the AG02."
-    fi
-
-    [[ -e "$USB4/authorized" ]] ||
-        die "USB4 device disappeared unexpectedly. Check state before powering off."
-
-    echo "Deauthorizing USB4 device..."
+    echo "Deauthorizing USB4 eGPU..."
     echo 0 | sudo tee "$USB4/authorized" >/dev/null
 
-    sleep 1
-
-    if [[ -e "$GPU_SYS" || -e "$AUDIO_SYS" ]]; then
-        die "PCIe devices reappeared. Do NOT power off the AG02."
+    # PCIe tunnel teardown is asynchronous. Wait until both GPU functions
+    # have actually disappeared instead of relying on a fixed delay.
+    local i
+    for ((i = 0; i < 50; i++)); do
+        detect_devices
+    
+        if [[ -z "$GPU" && -z "$AUDIO" ]]; then
+            break
+        fi
+    
+        sleep 0.1
+    done
+    
+    if [[ -n "$GPU" || -n "$AUDIO" ]]; then
+        die "GPU/audio still present 5 seconds after USB4 deauthorization. Do NOT power off the eGPU."
     fi
 
-    if [[ "$(cat "$USB4/authorized" 2>/dev/null || echo 0)" != "0" ]]; then
-        die "USB4 device is still authorized. Do NOT power off the AG02."
+    if [[ "$(usb4_authorized)" != "0" ]]; then
+        die "USB4 device is still authorized. Do NOT power off the eGPU."
     fi
 
     echo
-    echo "eGPU PCIe hierarchy removed and USB4 deauthorized."
-    echo "It is now safe to physically power off the AG02."
+    echo "eGPU PCIe tunnel removed and USB4 deauthorized."
+    echo "It is now safe to physically power off the eGPU."
 }
 
 to_windows() {
@@ -524,10 +633,10 @@ to_windows() {
         linux|vfio)
             ;;
         off-ready)
-            die "eGPU is detached but still powered on. Power-cycle the AG02 first."
+            die "eGPU is detached but still powered on. Power-cycle the eGPU first."
             ;;
         off)
-            die "eGPU is powered off/disconnected. Power on the AG02 first."
+            die "eGPU is powered off/disconnected. Power on the eGPU first."
             ;;
         *)
             die "Refusing Windows start from inconsistent eGPU state."

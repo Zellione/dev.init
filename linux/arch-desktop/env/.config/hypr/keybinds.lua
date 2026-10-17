@@ -16,6 +16,12 @@ hl.bind(
         'rofi -show drun -show-icons -display-drun "Apps" -theme ~/.config/rofi/themes/launcher.rasi'
     )
 )
+hl.bind(
+    mainMod .. " + W",
+    hl.dsp.exec_cmd(
+        "quickshell -c zell-shell ipc call wallpaper toggle"
+    )
+)
 
 -- Window management
 hl.bind(mainMod .. " + Q",         hl.dsp.window.close())
@@ -101,10 +107,15 @@ hl.bind(
     { mouse = true }
 )
 
--- Screenshots 
+-- Screenshots
 hl.bind(
     mainMod .. " + SHIFT + S",
     hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot-area.sh")
+)
+
+hl.bind(
+    "PRINT",
+    hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot-full.sh")
 )
 
 -- Clipboard

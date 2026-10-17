@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -u
+
+event_file=/run/wireview-health-monitor/event
+last_timestamp=""
+
+while true; do
+    if [[ -r "$event_file" ]]; then
+        TITLE=""
+        BODY=""
+        TIMESTAMP=""
+
+        source "$event_file"
+
+        if [[ -n "$TIMESTAMP" && "$TIMESTAMP" != "$last_timestamp" ]]; then
+            notify-send \
+                -u normal \
+                -a "WireView Pro II" \
+                "$TITLE" \
+                "$BODY"
+
+            last_timestamp="$TIMESTAMP"
+        fi
+    fi
+
+    sleep 1
+done

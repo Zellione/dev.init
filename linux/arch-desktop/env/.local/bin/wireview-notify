@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -u
+
+state_file=/run/wireview-watchdog/state
+last_state=""
+last_status=""
+
+while true; do
+    if [[ ! -r "$state_file" ]]; then
+        sleep 1
+        continue
+    fi
+
+    STATE=""
+    FAULT_STATUS_RAW=0
+    FAULT_LOG_RAW=0
+    TIMESTAMP=""
+
+    # File is generated locally by the root watchdog.
+    source "$state_file"
+
+    if [[ "$STATE" != "$last_state" || \
+          "$FAULT_STATUS_RAW" != "$last_status" ]]; then
+
+        case "$STATE" in
+            FAULT)
+                notify-send \
+                    -u critical \
+                    -a "WireView Pro II" \
+                    "GPU POWER CONNECTOR FAULT" \
+                    "WireView reports an active hardware fault.\nStatus: $FAULT_STATUS_RAW\nLog: $FAULT_LOG_RAW"
+                ;;
+
+            OK)
+                if [[ "$last_state" == "FAULT" ]]; then
+                    notify-send \
+                        -u normal \
+                        -a "WireView Pro II" \
+                        "WireView fault cleared" \
+                        "The active GPU power-connector fault is no longer present."
+                fi
+                ;;
+
+            UNAVAILABLE)
+                notify-send \
+                    -u normal \
+                    -a "WireView Pro II" \
+                    "WireView monitoring unavailable" \
+                    "The WireView hwmon device is currently unavailable."
+                ;;
+        esac
+
+        last_state=$STATE
+        last_status=$FAULT_STATUS_RAW
+    fi
+
+    sleep 1
+done

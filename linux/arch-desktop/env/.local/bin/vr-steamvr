@@ -1,0 +1,29 @@
+#!/bin/bash
+set -euo pipefail
+
+OPENXR_DIR="$HOME/.config/openxr/1"
+STEAMVR_JSON="$HOME/.local/share/Steam/steamapps/common/SteamVR/steamxr_linux64.json"
+
+mkdir -p "$OPENXR_DIR"
+
+ln -sfn "$STEAMVR_JSON" "$OPENXR_DIR/active_runtime.json"
+
+cat > "$HOME/.config/openvr/openvrpaths.vrpath" <<EOT
+{
+    "config" : [
+        "$HOME/.local/share/Steam/config"
+    ],
+    "external_drivers" : null,
+    "jsonid" : "vrpathreg",
+    "log" : [
+        "$HOME/.local/share/Steam/logs"
+    ],
+    "runtime" : [
+        "$HOME/.local/share/Steam/steamapps/common/SteamVR"
+    ],
+    "version" : 1
+}
+EOT
+
+echo "VR mode: SteamVR"
+echo "OpenXR -> $(readlink -f "$OPENXR_DIR/active_runtime.json")"

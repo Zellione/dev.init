@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -u
+
+echo "=== TIMESTAMP ==="
+date --iso-8601=seconds
+
+echo
+echo "=== MIME TYPES ==="
+wl-paste --list-types
+
+echo
+echo "=== CURRENT CONTENT ==="
+timeout 3 wl-paste --no-newline |
+    head -c 300
+echo
+
+echo
+echo "=== HISTORY ==="
+cliphist list | head -5
+
+echo
+echo "=== CLIPBOARD PROCESSES ==="
+pgrep -af 'wl-copy|wl-paste|cliphist' || true
