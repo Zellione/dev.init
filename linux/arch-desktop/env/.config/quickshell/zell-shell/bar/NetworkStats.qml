@@ -60,7 +60,7 @@ Rectangle {
     ZellTooltip {
         targetItem: root
         hovered: mouseArea.containsMouse
-    
+
         tooltipText: Network.connected
             ? "Interface: " + Network.interfaceName
             : "No default network route"

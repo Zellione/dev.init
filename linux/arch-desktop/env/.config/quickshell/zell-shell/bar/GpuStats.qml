@@ -39,10 +39,10 @@ Rectangle {
 
         Text {
             visible: Hardware.gpuAvailable && Hardware.gpuPower >= 0
-        
+
             text: Hardware.gpuPower.toFixed(0) + " W"
             color: Theme.violet
-        
+
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSize
         }

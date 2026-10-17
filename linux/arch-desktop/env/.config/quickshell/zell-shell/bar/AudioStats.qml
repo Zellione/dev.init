@@ -85,7 +85,7 @@ Rectangle {
     ZellTooltip {
         targetItem: root
         hovered: mouseArea.containsMouse
-    
+
         tooltipText:
             "Output: " + Audio.outputName
             + "\nVolume: " + Audio.outputVolume + "%"

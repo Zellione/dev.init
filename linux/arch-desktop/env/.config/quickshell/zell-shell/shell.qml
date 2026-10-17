@@ -10,6 +10,62 @@ ShellRoot {
         id: wallpaperPicker
     }
 
+    AppLauncher {
+        id: appLauncher
+    }
+
+    ClipboardPicker {
+        id: clipboardPicker
+    }
+
+    NotificationHistory {
+        id: notificationHistory
+    }
+
+    IpcHandler {
+        target: "notifications"
+
+        function open(mode: string): void {
+            notificationHistory.openHistory(mode);
+        }
+
+        function close(): void {
+            notificationHistory.closeHistory();
+        }
+    }
+
+    IpcHandler {
+        target: "clipboard"
+
+        function toggle(): void {
+            clipboardPicker.toggle();
+        }
+
+        function open(): void {
+            clipboardPicker.openPicker();
+        }
+
+        function close(): void {
+            clipboardPicker.closePicker();
+        }
+    }
+
+    IpcHandler {
+        target: "launcher"
+
+        function toggle(): void {
+            appLauncher.toggle();
+        }
+
+        function open(): void {
+            appLauncher.openLauncher();
+        }
+
+        function close(): void {
+            appLauncher.closeLauncher();
+        }
+    }
+
     IpcHandler {
         target: "wallpaper"
 

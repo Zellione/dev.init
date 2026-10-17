@@ -18,7 +18,12 @@ PanelWindow {
 
     implicitHeight: Theme.barHeight
     exclusiveZone: Theme.barHeight
-    color: Theme.background
+    color: Qt.rgba(
+        Theme.background.r,
+        Theme.background.g,
+        Theme.background.b,
+        0.90
+    )
 
     property bool showInfo: false
     property string currentTime: ""
@@ -42,9 +47,9 @@ PanelWindow {
     // Left: Hyprland workspaces
     Workspaces {
         id: workspaces
-    
+
         screen: bar.modelData
-    
+
         anchors.left: parent.left
         anchors.leftMargin: 8
         anchors.verticalCenter: parent.verticalCenter
@@ -72,6 +77,7 @@ PanelWindow {
     ControlCenter {
         id: dashboard
         targetItem: controlButton
+        targetScreen: bar.modelData
     }
 
     PowerMenu {
@@ -138,7 +144,7 @@ PanelWindow {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-        
+
             onClicked: {
                 dashboard.visible = !dashboard.visible
             }

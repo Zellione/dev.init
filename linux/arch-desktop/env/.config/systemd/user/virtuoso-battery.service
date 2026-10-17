@@ -1,0 +1,11 @@
+[Unit]
+Description=Corsair Virtuoso Battery Monitor
+
+[Service]
+Type=simple
+WorkingDirectory=%h/tools/virtuoso-daemon
+ExecStart=%h/tools/virtuoso-daemon/.venv/bin/python -m virtuoso_daemon battery-watch --interval 30
+Restart=no
+
+[Install]
+WantedBy=default.target

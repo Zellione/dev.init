@@ -123,7 +123,7 @@ hl.env("AQ_DRM_DEVICES", "/dev/dri/rtx5090")
 hl.config({
     general = {
         gaps_in  = 5,
-        gaps_out = 20,
+        gaps_out = 5,
 
         border_size = 2,
 
@@ -394,6 +394,27 @@ hl.window_rule({
 hl.window_rule({
     name = "center-wallpaper-picker",
     match = { title = "^Wallpaper Picker$" },
+    float = true,
+    center = true,
+})
+
+hl.window_rule({
+    name = "center-app-launcher",
+    match = { title = "^App Launcher$" },
+    float = true,
+    center = true,
+})
+
+hl.window_rule({
+    name = "center-clipboard-picker",
+    match = { title = "^Clipboard Picker$" },
+    float = true,
+    center = true,
+})
+
+hl.window_rule({
+    name = "center-notification-history",
+    match = { title = "^Notification History$" },
     float = true,
     center = true,
 })

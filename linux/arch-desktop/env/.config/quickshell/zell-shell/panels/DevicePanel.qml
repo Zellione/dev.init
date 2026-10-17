@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Services.Pipewire
 
 import "../theme"
@@ -7,6 +8,64 @@ import "../services"
 
 Item {
     id: root
+
+    readonly property real preferredHeight:
+        deviceColumn.implicitHeight
+
+    function sortedPhysical(input, states, defaultNode, nodes) {
+        const prefix = input ? "alsa_input." : "alsa_output.";
+
+        function rank(node) {
+            if (node === defaultNode)
+                return 0;
+
+            const state = states[node.name] || "unknown";
+
+            if (state === "available")
+                return 1;
+
+            if (state === "unavailable")
+                return 3;
+
+            return 2;
+        }
+
+        return [...nodes]
+            .filter(node =>
+                node.audio !== null
+                && !node.isStream
+                && (input ? !node.isSink : node.isSink)
+                && node.name.startsWith(prefix)
+            )
+            .sort((a, b) =>
+                rank(a) - rank(b)
+                || (a.description || a.name).localeCompare(
+                    b.description || b.name
+                )
+            );
+    }
+
+ScriptModel {
+    id: sortedOutputs
+
+    values: root.sortedPhysical(
+        false,
+        AudioPorts.sinkStates,
+        Pipewire.defaultAudioSink,
+        Pipewire.nodes.values
+    )
+}
+
+ScriptModel {
+    id: sortedInputs
+
+    values: root.sortedPhysical(
+        true,
+        AudioPorts.sourceStates,
+        Pipewire.defaultAudioSource,
+        Pipewire.nodes.values
+    )
+}
 
     Flickable {
         anchors.fill: parent
@@ -142,11 +201,11 @@ Item {
             }
 
             // =========================
-            // Output devices
+            // VR audio automation
             // =========================
 
             Text {
-                text: "OUTPUT DEVICES"
+                text: "VR AUDIO AUTOMATION"
 
                 color: Theme.cyan
                 font.family: Theme.fontFamily
@@ -154,136 +213,153 @@ Item {
                 font.bold: true
             }
 
-            Repeater {
-                model: Pipewire.nodes
+            Rectangle {
+                width: deviceColumn.width
+                height: 76
+                radius: Theme.cornerRadius
+                color: Theme.surface
 
-                delegate: Rectangle {
-                    id: outputRow
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 12
+                    spacing: 12
 
-                    required property var modelData
-
-                    readonly property bool candidate:
-                        modelData.audio !== null
-                        && !modelData.isStream
-                        && modelData.isSink
-                        && !modelData.name.endsWith(".monitor")
-
-                    readonly property bool current:
-                        modelData === Pipewire.defaultAudioSink
-
-                    readonly property bool selectable:
-                        Audio.isSelectableOutput(modelData)
-
-                    readonly property bool virtualDevice:
-                        modelData.name.startsWith("easyeffects_")
-
-                    width: deviceColumn.width
-                    height: candidate ? 72 : 0
-                    visible: candidate
-
-                    radius: Theme.cornerRadius
-
-                    color: current
-                        ? "#19303c"
-                        : Theme.surface
-
-                    border.width: current ? 1 : 0
-                    border.color: Theme.cyan
-
-                    Column {
-                        anchors.fill: parent
-                        anchors.margins: 10
+                    ColumnLayout {
+                        Layout.fillWidth: true
                         spacing: 5
 
-                        RowLayout {
-                            width: parent.width
-
-                            Text {
-                                Layout.fillWidth: true
-                                elide: Text.ElideRight
-
-                                text: outputRow.modelData.description
-                                    || outputRow.modelData.name
-
-                                color: outputRow.current
-                                    ? Theme.cyan
-                                    : Theme.foreground
-
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSmall
-                            }
-
-                            Text {
-                                text: outputRow.current
-                                    ? "DEFAULT"
-                                    : ""
-
-                                color: Theme.cyan
-                                font.family: Theme.fontFamily
-                                font.pixelSize: 11
-                                font.bold: true
-                            }
+                        Text {
+                            text: "Automatic device switching"
+                            color: Theme.foreground
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSmall
                         }
 
                         Text {
-                            width: parent.width
-                            elide: Text.ElideRight
+                            text: VrAudio.pending
+                                ? "Updating..."
+                                : VrAudio.errorMessage !== ""
+                                    ? VrAudio.errorMessage
+                                    : !VrAudio.known
+                                        ? "Service status unknown"
+                                        : VrAudio.active
+                                            ? "Active · Device selection locked"
+                                            : "Inactive · Manual selection enabled"
 
-                            text: outputRow.virtualDevice
-                                ? "Virtual / EasyEffects"
-                                : outputRow.modelData.name
+                            color: VrAudio.errorMessage !== ""
+                                ? Theme.danger : Theme.muted
 
-                            color: Theme.muted
                             font.family: Theme.fontFamily
                             font.pixelSize: 11
                         }
                     }
 
-                    // MouseArea is a direct child
-                    // of the delegate Rectangle.
-                    MouseArea {
-                        anchors.fill: parent
-                    
-                        enabled: true
-                        cursorShape: Qt.PointingHandCursor
-                    
-                        onClicked: {
-                            console.log(
-                                "[Devices] Click:",
-                                outputRow.modelData.name,
-                                "selectable:",
-                                outputRow.selectable,
-                                "current:",
-                                outputRow.current
-                            );
-                    
-                            if (outputRow.selectable && !outputRow.current) {
-                                console.log("[Devices] Calling selectOutput");
-                                Audio.selectOutput(outputRow.modelData);
+                    Rectangle {
+                        id: vrToggle
+
+                        width: 46
+                        height: 26
+                        radius: 13
+
+                        readonly property bool enabled:
+                            VrAudio.known && !VrAudio.pending
+
+                        opacity: enabled ? 1 : 0.5
+
+                        color: VrAudio.active
+                            ? Theme.cyan : "#343443"
+
+                        Rectangle {
+                            width: 20
+                            height: 20
+                            radius: 10
+
+                            x: VrAudio.active ? parent.width - width - 3 : 3
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            color: Theme.background
+
+                            Behavior on x {
+                                NumberAnimation {
+                                    duration: 130
+                                }
                             }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: vrToggle.enabled
+                            cursorShape: enabled
+                                ? Qt.PointingHandCursor
+                                : Qt.ArrowCursor
+
+                            onClicked: VrAudio.toggle()
                         }
                     }
                 }
             }
 
             // =========================
-            // Separator
+            // Physical output devices
+            // =========================
+
+            Text {
+                text: "OUTPUT DEVICES"
+                color: Theme.cyan
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontNormal
+                font.bold: true
+            }
+
+            Repeater {
+                model: sortedOutputs
+
+                delegate: AudioDeviceRow {
+                    inputDevice: false
+                    managed: false
+                }
+            }
+
+            // =========================
+            // Physical input devices
             // =========================
 
             Rectangle {
-                width: parent.width
+                width: deviceColumn.width
                 height: 1
                 color: "#343443"
             }
 
-            // =========================
-            // Input devices
-            // =========================
-
             Text {
                 text: "INPUT DEVICES"
-
                 color: Theme.violet
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontNormal
+                font.bold: true
+            }
+
+            Repeater {
+                model: sortedInputs
+
+                delegate: AudioDeviceRow {
+                    inputDevice: true
+                    managed: false
+                }
+            }
+
+            // =========================
+            // Managed / virtual devices
+            // =========================
+
+            Rectangle {
+                width: deviceColumn.width
+                height: 1
+                color: "#343443"
+            }
+
+            Text {
+                text: "VIRTUAL / MANAGED DEVICES"
+                color: Theme.muted
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontNormal
                 font.bold: true
@@ -292,106 +368,18 @@ Item {
             Repeater {
                 model: Pipewire.nodes
 
-                delegate: Rectangle {
-                    id: inputRow
+                delegate: AudioDeviceRow {
+                    inputDevice: false
+                    managed: true
+                }
+            }
 
-                    required property var modelData
+            Repeater {
+                model: Pipewire.nodes
 
-                    readonly property bool candidate:
-                        modelData.audio !== null
-                        && !modelData.isStream
-                        && !modelData.isSink
-                        && !modelData.name.endsWith(".monitor")
-
-                    readonly property bool current:
-                        modelData === Pipewire.defaultAudioSource
-
-                    readonly property bool selectable:
-                        Audio.isSelectableInput(modelData)
-
-                    readonly property bool virtualDevice:
-                        modelData.name.startsWith("easyeffects_")
-
-                    width: deviceColumn.width
-                    height: candidate ? 72 : 0
-                    visible: candidate
-
-                    radius: Theme.cornerRadius
-
-                    color: current
-                        ? "#292438"
-                        : Theme.surface
-
-                    border.width: current ? 1 : 0
-                    border.color: Theme.violet
-
-                    Column {
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 5
-
-                        RowLayout {
-                            width: parent.width
-
-                            Text {
-                                Layout.fillWidth: true
-                                elide: Text.ElideRight
-
-                                text: inputRow.modelData.description
-                                    || inputRow.modelData.name
-
-                                color: inputRow.current
-                                    ? Theme.violet
-                                    : Theme.foreground
-
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSmall
-                            }
-
-                            Text {
-                                text: inputRow.current
-                                    ? "DEFAULT"
-                                    : ""
-
-                                color: Theme.violet
-                                font.family: Theme.fontFamily
-                                font.pixelSize: 11
-                                font.bold: true
-                            }
-                        }
-
-                        Text {
-                            width: parent.width
-                            elide: Text.ElideRight
-
-                            text: inputRow.virtualDevice
-                                ? "Virtual / EasyEffects"
-                                : inputRow.modelData.name
-
-                            color: Theme.muted
-                            font.family: Theme.fontFamily
-                            font.pixelSize: 11
-                        }
-                    }
-
-                    // MouseArea is a direct child
-                    // of the delegate Rectangle.
-                    MouseArea {
-                        anchors.fill: parent
-
-                        enabled: inputRow.selectable
-                            && !inputRow.current
-
-                        cursorShape: enabled
-                            ? Qt.PointingHandCursor
-                            : Qt.ArrowCursor
-
-                        onClicked: {
-                            Audio.selectInput(
-                                inputRow.modelData
-                            );
-                        }
-                    }
+                delegate: AudioDeviceRow {
+                    inputDevice: true
+                    managed: true
                 }
             }
         }

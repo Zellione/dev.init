@@ -8,12 +8,30 @@ PopupWindow {
     id: popup
 
     required property Item targetItem
+    required property var targetScreen
 
     visible: false
     grabFocus: true
 
     implicitWidth: 480
-    implicitHeight: 700
+
+    readonly property real screenHeight:
+        targetScreen ? targetScreen.height : 900
+
+    readonly property real maximumHeight:
+        Math.max(200, screenHeight - Theme.barHeight - 16)
+
+    readonly property real desiredHeight:
+        currentTab === 0
+            ? hardwarePanel.preferredHeight + 110
+            : currentTab === 2
+                ? devicePanel.preferredHeight + 110
+                : 700
+
+    implicitHeight: Math.min(
+        desiredHeight,
+        maximumHeight
+    )
 
     color: "transparent"
 
@@ -124,12 +142,14 @@ PopupWindow {
                 currentIndex: popup.currentTab
 
                 HardwarePanel {
+                    id: hardwarePanel
                 }
 
                 AudioPanel {
                 }
 
                 DevicePanel {
+                    id: devicePanel
                 }
             }
         }

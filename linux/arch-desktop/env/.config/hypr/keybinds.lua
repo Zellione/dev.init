@@ -11,9 +11,15 @@ hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("~/.config/hypr/scripts/power
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("kitty"))
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("dolphin"))
 hl.bind(
-    mainMod .. " + D",
+    mainMod .. " + SHIFT + D",
     hl.dsp.exec_cmd(
         'rofi -show drun -show-icons -display-drun "Apps" -theme ~/.config/rofi/themes/launcher.rasi'
+    )
+)
+hl.bind(
+    mainMod .. " + D",
+    hl.dsp.exec_cmd(
+        "quickshell -c zell-shell ipc call launcher toggle"
     )
 )
 hl.bind(
@@ -118,24 +124,48 @@ hl.bind(
     hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot-full.sh")
 )
 
--- Clipboard
+-- Clipboard: Quickshell
 hl.bind(
-   mainMod .. " + V",
-   hl.dsp.exec_cmd("~/.config/hypr/scripts/clipboard.sh")
+    mainMod .. " + V",
+    hl.dsp.exec_cmd(
+        "quickshell -c zell-shell ipc call clipboard toggle"
+    )
 )
 
--- Notifications
+-- Clipboard: Rofi fallback
+hl.bind(
+    mainMod .. " + SHIFT + V",
+    hl.dsp.exec_cmd(
+        "~/.config/hypr/scripts/clipboard.sh"
+    )
+)
+
+-- Notifications: Quickshell
 hl.bind(
     mainMod .. " + N",
-    hl.dsp.exec_cmd("~/.local/bin/notification-history")
+    hl.dsp.exec_cmd(
+        "quickshell -c zell-shell ipc call notifications open all"
+    )
 )
 
 hl.bind(
     mainMod .. " + SHIFT + N",
-    hl.dsp.exec_cmd("~/.local/bin/notification-history critical")
+    hl.dsp.exec_cmd(
+        "quickshell -c zell-shell ipc call notifications open critical"
+    )
 )
 
 hl.bind(
     mainMod .. " + CTRL + N",
-    hl.dsp.exec_cmd("~/.local/bin/notification-history normal")
+    hl.dsp.exec_cmd(
+        "quickshell -c zell-shell ipc call notifications open normal"
+    )
+)
+
+-- Notifications: Rofi fallback
+hl.bind(
+    mainMod .. " + CTRL + SHIFT + N",
+    hl.dsp.exec_cmd(
+        "~/.local/bin/notification-history"
+    )
 )

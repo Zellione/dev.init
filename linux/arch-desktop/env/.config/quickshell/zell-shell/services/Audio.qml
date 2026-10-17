@@ -92,7 +92,7 @@ Singleton {
             && node.isSink
             && node.name.startsWith("alsa_output.");
     }
-    
+
     function isSelectableInput(node) {
         return node !== null
             && node.audio !== null
@@ -100,42 +100,30 @@ Singleton {
             && !node.isSink
             && node.name.startsWith("alsa_input.");
     }
-    
+
     function selectOutput(node) {
-        console.log(
-            "[Audio] selectOutput:",
-            node ? node.name : "null",
-            "ready:",
-            Pipewire.ready
-        );
-    
         if (!Pipewire.ready || !isSelectableOutput(node)) {
             console.warn("[Audio] Selection rejected");
             return;
         }
-    
+
         if (node === Pipewire.defaultAudioSink) {
-            console.log("[Audio] Already default");
             return;
         }
-    
+
         Pipewire.preferredDefaultAudioSink = node;
-    
-        console.log(
-            "[Audio] Preferred sink:",
-            Pipewire.preferredDefaultAudioSink
-                ? Pipewire.preferredDefaultAudioSink.name
-                : "null"
-        );
     }
-    
+
     function selectInput(node) {
-        if (!Pipewire.ready || !isSelectableInput(node))
+        if (!Pipewire.ready || !isSelectableInput(node)) {
+            console.warn("[Audio] Input selection rejected");
             return;
-    
-        if (node === Pipewire.defaultAudioSource)
+        }
+
+        if (node === Pipewire.defaultAudioSource) {
             return;
-    
+        }
+
         Pipewire.preferredDefaultAudioSource = node;
     }
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
 import csv
 import glob
 import io
@@ -58,8 +59,57 @@ def cpu_temperature():
     return None
 
 
-def gpu_stats():
+EGPU_VENDOR = "0x10de"
+EGPU_DEVICE = "0x2c05"
+
+
+def normalize_pci(address):
+    """Normalize NVIDIA and sysfs PCI bus addresses."""
+    try:
+        domain, bus, device_function = address.strip().split(":")
+        device, function = device_function.split(".")
+
+        return (
+            f"{int(domain, 16):04x}:"
+            f"{int(bus, 16):02x}:"
+            f"{int(device, 16):02x}."
+            f"{int(function, 16):x}"
+        )
+    except (ValueError, AttributeError):
+        return None
+
+
+def egpu_pci():
+    """Locate the external NVIDIA GPU without changing its state."""
+    for path in Path("/sys/bus/pci/devices").glob("*"):
+        try:
+            vendor = (path / "vendor").read_text().strip().lower()
+            device = (path / "device").read_text().strip().lower()
+
+            if (vendor, device) != (EGPU_VENDOR, EGPU_DEVICE):
+                continue
+
+            driver_link = path / "driver"
+            driver = (
+                driver_link.resolve().name
+                if driver_link.exists()
+                else "unbound"
+            )
+
+            return {
+                "pci": normalize_pci(path.name),
+                "driver": driver,
+            }
+        except OSError:
+            continue
+
+    return None
+
+
+def nvidia_gpu_stats():
     fields = [
+        "pci.bus_id",
+        "name",
         "utilization.gpu",
         "temperature.gpu",
         "memory.used",
@@ -81,40 +131,94 @@ def gpu_stats():
             check=True,
         )
 
-        rows = list(csv.reader(io.StringIO(result.stdout)))
+        devices = {}
 
-        if not rows or len(rows[0]) != len(fields):
-            return None
+        for row in csv.reader(io.StringIO(result.stdout)):
+            if len(row) != len(fields):
+                continue
 
-        values = [value.strip() for value in rows[0]]
+            (
+                pci, name, util, temp,
+                used, total, power, pstate
+            ) = [value.strip() for value in row]
 
-        util, temp, used, total, power, pstate = values
+            pci = normalize_pci(pci)
+            if pci is None:
+                continue
 
-        return {
-            "usage": int(util),
-            "temperature": int(temp),
-            "memoryUsed": round(float(used) / 1024, 1),
-            "memoryTotal": round(float(total) / 1024, 1),
-            "power": (
-                None if power in ("N/A", "[Not Supported]")
-                else round(float(power), 1)
-            ),
-            "pstate": pstate,
-        }
+            def numeric(value, converter):
+                try:
+                    return converter(value)
+                except (ValueError, TypeError):
+                    return None
+
+            used_mib = numeric(used, float)
+            total_mib = numeric(total, float)
+
+            devices[pci] = {
+                "pci": pci,
+                "name": name,
+                "usage": numeric(util, int),
+                "temperature": numeric(temp, int),
+                "memoryUsed": (
+                    round(used_mib / 1024, 1)
+                    if used_mib is not None else None
+                ),
+                "memoryTotal": (
+                    round(total_mib / 1024, 1)
+                    if total_mib is not None else None
+                ),
+                "power": numeric(power, float),
+                "pstate": pstate,
+            }
+
+        return devices
 
     except (
         FileNotFoundError,
         subprocess.SubprocessError,
-        ValueError,
-        IndexError,
+        OSError,
     ):
-        return None
+        return {}
+
+
+def gpu_stats():
+    external = egpu_pci()
+    devices = nvidia_gpu_stats()
+
+    external_pci = external["pci"] if external else None
+
+    internal = next(
+        (
+            gpu for pci, gpu in devices.items()
+            if pci != external_pci
+        ),
+        None,
+    )
+
+    if external is None:
+        return internal, None
+
+    egpu = {
+        "pci": external_pci,
+        "driver": external["driver"],
+        "gpu": (
+            devices.get(external_pci)
+            if external["driver"] == "nvidia"
+            else None
+        ),
+    }
+
+    return internal, egpu
 
 
 if __name__ == "__main__":
+    internal_gpu, external_gpu = gpu_stats()
+
     print(json.dumps({
         "cpu": cpu_usage(),
         "memory": memory_usage(),
         "temperature": cpu_temperature(),
-        "gpu": gpu_stats(),
+        "gpu": internal_gpu,
+        "egpu": external_gpu,
     }))
