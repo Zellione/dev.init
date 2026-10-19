@@ -47,9 +47,9 @@ PanelWindow {
     // Left: Hyprland workspaces
     Workspaces {
         id: workspaces
-
+    
         screen: bar.modelData
-
+    
         anchors.left: parent.left
         anchors.leftMargin: 8
         anchors.verticalCenter: parent.verticalCenter
@@ -57,13 +57,14 @@ PanelWindow {
 
     // Center: Clock
     Rectangle {
+        id: clockBox
         anchors.centerIn: parent
-
+    
         width: clockLabel.implicitWidth + 24
         height: 34
         radius: Theme.cornerRadius
         color: Theme.surface
-
+    
         Text {
             id: clockLabel
             anchors.centerIn: parent
@@ -144,7 +145,7 @@ PanelWindow {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-
+        
             onClicked: {
                 dashboard.visible = !dashboard.visible
             }
@@ -180,12 +181,12 @@ PanelWindow {
         anchors.verticalCenter: parent.verticalCenter
     }
 
-    // Fixed network position, reserving space for 5 workspaces
+    // Network traffic, directly left of the clock
     NetworkStats {
         id: networkStats
-
-        anchors.left: parent.left
-        anchors.leftMargin: 260
+    
+        anchors.right: clockBox.left
+        anchors.rightMargin: 10
         anchors.verticalCenter: parent.verticalCenter
     }
 
