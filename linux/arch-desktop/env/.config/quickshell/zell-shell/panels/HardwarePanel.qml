@@ -220,27 +220,27 @@ Item {
         // =========================
         // External GPU
         // =========================
-
+        
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 12
-
+        
             visible: Hardware.egpuPresent
-
+        
             readonly property var gpu:
                 Hardware.egpuNvidiaAvailable
                     ? Hardware.egpu.gpu
                     : null
-
+        
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: "#343443"
             }
-
+        
             RowLayout {
                 Layout.fillWidth: true
-
+        
                 Text {
                     text: "EXTERNAL GPU"
                     color: Theme.violet
@@ -249,82 +249,82 @@ Item {
                     font.bold: true
                     Layout.fillWidth: true
                 }
-
+        
                 Text {
                     text: Hardware.egpuNvidiaAvailable
                         ? Hardware.egpu.gpu.name.replace("NVIDIA GeForce ", "")
                         : Hardware.egpuPresent
                             ? Hardware.egpu.driver.toUpperCase()
                             : ""
-
+        
                     color: Theme.muted
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSmall
                 }
             }
-
+        
             Text {
                 Layout.fillWidth: true
                 visible: !Hardware.egpuNvidiaAvailable
-
+        
                 text: Hardware.egpuPresent
                     ? "Driver: " + Hardware.egpu.driver
                     : ""
-
+        
                 color: Theme.muted
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontNormal
             }
-
+        
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 10
                 visible: Hardware.egpuNvidiaAvailable
-
+        
                 MetricCard {
                     Layout.fillWidth: true
-
+        
                     title: "GPU Load"
                     value: parent.parent.gpu
                         && parent.parent.gpu.usage !== null
                         ? parent.parent.gpu.usage + "%"
                         : "N/A"
-
+        
                     percentage: parent.parent.gpu
                         ? parent.parent.gpu.usage ?? 0
                         : 0
-
+        
                     accent: Theme.violet
                     cardBackground: "#292438"
                     trackColor: "#3c354b"
                 }
-
+        
                 MetricCard {
                     Layout.fillWidth: true
-
+        
                     title: "VRAM"
                     value: parent.parent.gpu
                         && parent.parent.gpu.memoryUsed !== null
                         ? parent.parent.gpu.memoryUsed.toFixed(1) + " GiB"
                         : "N/A"
-
+        
                     percentage: parent.parent.gpu
                         && parent.parent.gpu.memoryTotal > 0
                         ? 100 * parent.parent.gpu.memoryUsed
                             / parent.parent.gpu.memoryTotal
                         : 0
-
+        
                     accent: Theme.violet
                     cardBackground: "#292438"
                     trackColor: "#3c354b"
                 }
             }
-
+        
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 12
                 visible: Hardware.egpuNvidiaAvailable
-
+        
                 Repeater {
                     model: [
                         {
@@ -348,19 +348,19 @@ Item {
                                 : "N/A"
                         }
                     ]
-
+        
                     delegate: Item {
                         required property var modelData
-
+        
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         implicitHeight: metricColumn.implicitHeight
-
+        
                         ColumnLayout {
                             id: metricColumn
                             anchors.fill: parent
                             spacing: 4
-
+        
                             Text {
                                 Layout.fillWidth: true
                                 text: modelData.label
@@ -368,7 +368,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSmall
                             }
-
+        
                             Text {
                                 Layout.fillWidth: true
                                 text: modelData.value

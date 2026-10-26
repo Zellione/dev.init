@@ -43,8 +43,20 @@ FloatingWindow {
 
         const app = apps[index];
 
+        if (!app.id) {
+            console.warn("Cannot launch app without desktop entry ID");
+            return;
+        }
+
+        const desktopId = app.id.endsWith(".desktop")
+            ? app.id
+            : app.id + ".desktop";
+
+        Quickshell.execDetached([
+            "uwsm", "app", "-t", "scope", "--", desktopId
+        ]);
+
         closeLauncher();
-        app.execute();
     }
 
     ScriptModel {
@@ -157,7 +169,7 @@ FloatingWindow {
                 onTextChanged: {
                     appList.currentIndex = filteredApps.values.length > 0
                         ? 0 : -1;
-
+                
                     appList.positionViewAtBeginning();
                 }
 

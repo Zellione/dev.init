@@ -18,7 +18,7 @@ FloatingWindow {
     Shortcut {
         sequence: "Escape"
         context: Qt.WindowShortcut
-
+    
         onActivated: {
             if (historyWindow.selectedNotification !== null)
                 historyWindow.closeDetail();
@@ -144,10 +144,10 @@ FloatingWindow {
 
     Process {
         id: copyProcess
-
+    
         stdout: null
         stderr: null
-
+    
         onExited: (code, status) => {
             if (code !== 0) {
                 historyWindow.errorMessage =
@@ -585,7 +585,7 @@ FloatingWindow {
                             historyWindow.closeDetail();
                             event.accepted = true;
                         }
-
+                        
                         Keys.onPressed: event => {
                             if (event.key === Qt.Key_Backspace) {
                                 historyWindow.closeDetail();

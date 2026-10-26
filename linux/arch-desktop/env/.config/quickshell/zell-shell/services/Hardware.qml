@@ -23,10 +23,10 @@ Singleton {
 
     // External GPU
     property var egpu: null
-
+    
     readonly property bool egpuPresent:
         egpu !== null
-
+    
     readonly property bool egpuNvidiaAvailable:
         egpuPresent
         && egpu.driver === "nvidia"
@@ -55,7 +55,7 @@ Singleton {
 
                     if (data.gpu !== null && data.gpu !== undefined) {
                         const gpu = data.gpu;
-
+                    
                         hardware.gpuAvailable = true;
                         hardware.gpuUsage = gpu.usage ?? 0;
                         hardware.gpuTemperature = gpu.temperature ?? -1;

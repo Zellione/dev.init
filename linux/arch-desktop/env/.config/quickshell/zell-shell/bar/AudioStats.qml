@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import Quickshell
 
 import "../components"
 import "../theme"
@@ -62,11 +63,18 @@ Rectangle {
 
         enabled: Audio.outputAvailable
         hoverEnabled: true
-        acceptedButtons: Qt.LeftButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: Qt.PointingHandCursor
 
-        onClicked: {
-            Audio.toggleOutputMute();
+        onClicked: function(mouse) {
+            if (mouse.button === Qt.RightButton) {
+                Quickshell.execDetached([
+                    "uwsm", "app", "-t", "service",
+                    "--", "pavucontrol"
+                ]);
+            } else if (mouse.button === Qt.LeftButton) {
+                Audio.toggleOutputMute();
+            }
         }
 
         onWheel: function(wheel) {
@@ -85,7 +93,7 @@ Rectangle {
     ZellTooltip {
         targetItem: root
         hovered: mouseArea.containsMouse
-
+    
         tooltipText:
             "Output: " + Audio.outputName
             + "\nVolume: " + Audio.outputVolume + "%"

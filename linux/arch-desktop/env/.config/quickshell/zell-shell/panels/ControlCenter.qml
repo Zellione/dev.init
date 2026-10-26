@@ -14,13 +14,13 @@ PopupWindow {
     grabFocus: true
 
     implicitWidth: 480
-
+    
     readonly property real screenHeight:
         targetScreen ? targetScreen.height : 900
-
+    
     readonly property real maximumHeight:
         Math.max(200, screenHeight - Theme.barHeight - 16)
-
+    
     readonly property real desiredHeight:
         currentTab === 0
             ? hardwarePanel.preferredHeight + 110

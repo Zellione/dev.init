@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 import "../theme"
 import "../services"
@@ -138,6 +139,44 @@ Item {
                     value: Audio.inputVolume
 
                     onMoved: Audio.setInputVolume(value)
+                }
+            }
+        }
+
+        Rectangle {
+            id: mixerButton
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: 42
+
+            radius: Theme.cornerRadius
+            color: mixerMouse.containsMouse
+                ? "#19303c"
+                : Theme.surface
+
+            border.color: Theme.cyan
+            border.width: 1
+
+            Text {
+                anchors.centerIn: parent
+                text: "Open Audio Mixer"
+                color: Theme.cyan
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontNormal
+                font.bold: true
+            }
+
+            MouseArea {
+                id: mixerMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+
+                onClicked: {
+                    Quickshell.execDetached([
+                        "uwsm", "app", "-t", "service",
+                        "--", "pavucontrol"
+                    ]);
                 }
             }
         }

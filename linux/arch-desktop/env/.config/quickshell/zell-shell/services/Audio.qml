@@ -92,7 +92,7 @@ Singleton {
             && node.isSink
             && node.name.startsWith("alsa_output.");
     }
-
+    
     function isSelectableInput(node) {
         return node !== null
             && node.audio !== null
@@ -100,30 +100,30 @@ Singleton {
             && !node.isSink
             && node.name.startsWith("alsa_input.");
     }
-
+    
     function selectOutput(node) {
         if (!Pipewire.ready || !isSelectableOutput(node)) {
             console.warn("[Audio] Selection rejected");
             return;
         }
-
+    
         if (node === Pipewire.defaultAudioSink) {
             return;
         }
-
+    
         Pipewire.preferredDefaultAudioSink = node;
     }
-
+    
     function selectInput(node) {
         if (!Pipewire.ready || !isSelectableInput(node)) {
             console.warn("[Audio] Input selection rejected");
             return;
         }
-
+    
         if (node === Pipewire.defaultAudioSource) {
             return;
         }
-
+    
         Pipewire.preferredDefaultAudioSource = node;
     }
 }

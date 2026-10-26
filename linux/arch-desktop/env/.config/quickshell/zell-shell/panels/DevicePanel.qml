@@ -14,22 +14,22 @@ Item {
 
     function sortedPhysical(input, states, defaultNode, nodes) {
         const prefix = input ? "alsa_input." : "alsa_output.";
-
+    
         function rank(node) {
             if (node === defaultNode)
                 return 0;
-
+    
             const state = states[node.name] || "unknown";
-
+    
             if (state === "available")
                 return 1;
-
+    
             if (state === "unavailable")
                 return 3;
-
+    
             return 2;
         }
-
+    
         return [...nodes]
             .filter(node =>
                 node.audio !== null
@@ -203,38 +203,38 @@ ScriptModel {
             // =========================
             // VR audio automation
             // =========================
-
+            
             Text {
                 text: "VR AUDIO AUTOMATION"
-
+            
                 color: Theme.cyan
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontNormal
                 font.bold: true
             }
-
+            
             Rectangle {
                 width: deviceColumn.width
                 height: 76
                 radius: Theme.cornerRadius
                 color: Theme.surface
-
+            
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 12
                     spacing: 12
-
+            
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 5
-
+            
                         Text {
                             text: "Automatic device switching"
                             color: Theme.foreground
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSmall
                         }
-
+            
                         Text {
                             text: VrAudio.pending
                                 ? "Updating..."
@@ -245,54 +245,54 @@ ScriptModel {
                                         : VrAudio.active
                                             ? "Active · Device selection locked"
                                             : "Inactive · Manual selection enabled"
-
+            
                             color: VrAudio.errorMessage !== ""
                                 ? Theme.danger : Theme.muted
-
+            
                             font.family: Theme.fontFamily
                             font.pixelSize: 11
                         }
                     }
-
+            
                     Rectangle {
                         id: vrToggle
-
+            
                         width: 46
                         height: 26
                         radius: 13
-
+            
                         readonly property bool enabled:
                             VrAudio.known && !VrAudio.pending
-
+            
                         opacity: enabled ? 1 : 0.5
-
+            
                         color: VrAudio.active
                             ? Theme.cyan : "#343443"
-
+            
                         Rectangle {
                             width: 20
                             height: 20
                             radius: 10
-
+            
                             x: VrAudio.active ? parent.width - width - 3 : 3
                             anchors.verticalCenter: parent.verticalCenter
-
+            
                             color: Theme.background
-
+            
                             Behavior on x {
                                 NumberAnimation {
                                     duration: 130
                                 }
                             }
                         }
-
+            
                         MouseArea {
                             anchors.fill: parent
                             enabled: vrToggle.enabled
                             cursorShape: enabled
                                 ? Qt.PointingHandCursor
                                 : Qt.ArrowCursor
-
+            
                             onClicked: VrAudio.toggle()
                         }
                     }
@@ -302,7 +302,7 @@ ScriptModel {
             // =========================
             // Physical output devices
             // =========================
-
+            
             Text {
                 text: "OUTPUT DEVICES"
                 color: Theme.cyan
@@ -310,26 +310,26 @@ ScriptModel {
                 font.pixelSize: Theme.fontNormal
                 font.bold: true
             }
-
+            
             Repeater {
                 model: sortedOutputs
-
+            
                 delegate: AudioDeviceRow {
                     inputDevice: false
                     managed: false
                 }
             }
-
+            
             // =========================
             // Physical input devices
             // =========================
-
+            
             Rectangle {
                 width: deviceColumn.width
                 height: 1
                 color: "#343443"
             }
-
+            
             Text {
                 text: "INPUT DEVICES"
                 color: Theme.violet
@@ -337,26 +337,26 @@ ScriptModel {
                 font.pixelSize: Theme.fontNormal
                 font.bold: true
             }
-
+            
             Repeater {
                 model: sortedInputs
-
+            
                 delegate: AudioDeviceRow {
                     inputDevice: true
                     managed: false
                 }
             }
-
+            
             // =========================
             // Managed / virtual devices
             // =========================
-
+            
             Rectangle {
                 width: deviceColumn.width
                 height: 1
                 color: "#343443"
             }
-
+            
             Text {
                 text: "VIRTUAL / MANAGED DEVICES"
                 color: Theme.muted
@@ -364,19 +364,19 @@ ScriptModel {
                 font.pixelSize: Theme.fontNormal
                 font.bold: true
             }
-
+            
             Repeater {
                 model: Pipewire.nodes
-
+            
                 delegate: AudioDeviceRow {
                     inputDevice: false
                     managed: true
                 }
             }
-
+            
             Repeater {
                 model: Pipewire.nodes
-
+            
                 delegate: AudioDeviceRow {
                     inputDevice: true
                     managed: true

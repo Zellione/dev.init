@@ -31,12 +31,12 @@ FloatingWindow {
     function selectCurrentWallpaper() {
         if (currentWallpaper === "")
             return;
-
+    
         const index = filteredWallpapers.indexOf(currentWallpaper);
-
+    
         if (index < 0)
             return;
-
+    
         grid.currentIndex = index;
         grid.positionViewAtIndex(index, GridView.Center);
     }
@@ -53,14 +53,14 @@ FloatingWindow {
         query = "";
         searchField.text = "";
         errorMessage = "";
-
+    
         grid.currentIndex = 0;
-
+    
         visible = true;
-
+    
         refreshList.running = true;
         currentReader.running = true;
-
+    
         searchField.forceActiveFocus();
     }
 
@@ -91,7 +91,7 @@ FloatingWindow {
                     .split(/\r?\n/)
                     .map(name => name.trim())
                     .filter(name => name.length > 0);
-
+            
                 picker.selectCurrentWallpaper();
             }
         }
@@ -99,16 +99,16 @@ FloatingWindow {
 
     Process {
         id: currentReader
-
+    
         command: [
             Quickshell.env("HOME") + "/.local/bin/zell-wallpaper",
             "--current"
         ]
-
+    
         stdout: StdioCollector {
             onStreamFinished: {
                 const path = text.trim();
-
+    
                 picker.currentWallpaper = path.split("/").pop();
                 picker.selectCurrentWallpaper();
             }
@@ -205,12 +205,12 @@ FloatingWindow {
                     grid.forceActiveFocus();
                     grid.moveCurrentIndexDown();
                 }
-
+                
                 Keys.onRightPressed: {
                     grid.forceActiveFocus();
                     grid.moveCurrentIndexRight();
                 }
-
+                
                 Keys.onLeftPressed: {
                     grid.forceActiveFocus();
                     grid.moveCurrentIndexLeft();
@@ -253,10 +253,10 @@ FloatingWindow {
 
                     readonly property bool selected:
                         modelData === picker.currentWallpaper
-
+                    
                     readonly property bool highlighted:
                         tile.index === grid.currentIndex
-
+                    
                     Image {
                         anchors.fill: parent
                         source: "file://" + picker.wallpaperDir
@@ -294,17 +294,17 @@ FloatingWindow {
 
                     Rectangle {
                         anchors.fill: parent
-
+                    
                         color: "transparent"
                         radius: tile.radius
-
+                    
                         border.width: tile.highlighted ? 3 : (tile.selected ? 2 : 0)
                         border.color: tile.highlighted
                             ? Theme.violet
                             : Theme.cyan
-
+                    
                         visible: tile.highlighted || tile.selected
-
+                    
                         z: 10
                     }
 

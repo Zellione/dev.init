@@ -65,11 +65,11 @@ FloatingWindow {
     function switchTab(tab) {
         if (tab < 0 || tab > 1)
             return;
-
+    
         activeTab = tab;
         searchField.text = "";
         resetSelection();
-
+    
         if (activeTab === 0)
             searchField.forceActiveFocus();
         else
@@ -412,11 +412,11 @@ FloatingWindow {
 
             StackLayout {
                 id: contentStack
-
+            
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 currentIndex: picker.activeTab
-
+            
                 focus: picker.activeTab === 1
                 Keys.onPressed: event => picker.handleKey(event)
 

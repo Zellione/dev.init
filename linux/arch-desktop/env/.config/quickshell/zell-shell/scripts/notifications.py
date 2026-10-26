@@ -72,7 +72,7 @@ def copy_notification(notification_id, field):
         stderr=subprocess.DEVNULL,
         start_new_session=True,
     )
-
+    
     assert process.stdin is not None
     process.stdin.write(value.encode("utf-8"))
     process.stdin.close()

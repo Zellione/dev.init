@@ -38,7 +38,7 @@ Rectangle {
 
     readonly property string portAvailability:
         AudioPorts.forNode(modelData.name, inputDevice)
-
+    
     readonly property bool unavailable:
         portAvailability === "unavailable"
 

@@ -40,13 +40,13 @@ Row {
             function openMenu() {
                 if (!modelData.hasMenu)
                     return;
-
+            
                 const position = trayEntry.mapToItem(
                     root.panelWindow.contentItem,
                     0,
                     trayEntry.height
                 );
-
+            
                 modelData.display(
                     root.panelWindow,
                     Math.round(position.x),
