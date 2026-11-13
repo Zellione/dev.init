@@ -1,4 +1,177 @@
 #!/usr/bin/env bash
+
+# Read-only PCIe/AER diagnostics for the RTX 5070 Ti eGPU.
+egpu_pcie_aer_status() {
+    local gpu_sys=""
+    local candidate
+    local current_dir
+    local pci_id
+    local pci_details
+    local attr
+    local total_key
+    local total_value
+    local nonzero
+    local have_privilege=0
+    local -a pci_chain=()
+
+    echo
+    echo "=== PCIe / AER (READ ONLY) ==="
+    date --iso-8601=seconds
+
+    # Identify the RTX 5070 Ti by PCI vendor/device ID.
+    for candidate in /sys/bus/pci/devices/*; do
+        [[ -r "$candidate/vendor" ]] || continue
+        [[ -r "$candidate/device" ]] || continue
+
+        if [[ "$(<"$candidate/vendor")" == "0x10de" &&
+              "$(<"$candidate/device")" == "0x2c05" ]]; then
+            gpu_sys="$candidate"
+            break
+        fi
+    done
+
+    if [[ -z "$gpu_sys" ]]; then
+        echo "RTX 5070 Ti (10de:2c05) not present."
+        return 0
+    fi
+
+    # Walk upwards through the actual PCIe topology.
+    current_dir="$(readlink -f "$gpu_sys")"
+
+    for ((i = 0; i < 3; i++)); do
+        pci_id="$(basename "$current_dir")"
+
+        if [[ ! "$pci_id" =~ ^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7]$ ]]; then
+            break
+        fi
+
+        pci_chain=("$pci_id" "${pci_chain[@]}")
+        current_dir="$(dirname "$current_dir")"
+    done
+
+    # Use an existing sudo authentication, but never prompt.
+    if ((EUID == 0)); then
+        have_privilege=1
+    elif sudo -n true >/dev/null 2>&1; then
+        have_privilege=1
+    fi
+
+    if ((have_privilege == 0)); then
+        echo "Full PCIe register access needs sudo."
+        echo "Run: sudo -v && egpu status"
+        echo "Readable AER counters are shown below."
+    fi
+
+    for pci_id in "${pci_chain[@]}"; do
+        echo
+        echo "--- $pci_id ---"
+
+        if [[ ! -d "/sys/bus/pci/devices/$pci_id" ]]; then
+            echo "Device disappeared."
+            continue
+        fi
+
+        # PCIe configuration space: read-only.
+        if ((have_privilege == 1)); then
+            if ((EUID == 0)); then
+                pci_details="$(
+                    lspci -D -vvv -s "$pci_id" 2>/dev/null
+                )"
+            else
+                pci_details="$(
+                    sudo -n lspci -D -vvv \
+                        -s "$pci_id" 2>/dev/null
+                )"
+            fi
+
+            printf '%s\n' "$pci_details" |
+                grep -E \
+                  '^[[:space:]]*(DevSta:|LnkSta:|LnkCtl2:|UESta:|CESta:|RootSta:|DpcSta:)' \
+                || true
+        fi
+
+        sys_dir="/sys/bus/pci/devices/$pci_id"
+
+        cor="N/A"
+        nonfatal="N/A"
+        fatal="N/A"
+
+        for spec in \
+            "aer_dev_correctable:TOTAL_ERR_COR" \
+            "aer_dev_nonfatal:TOTAL_ERR_NONFATAL" \
+            "aer_dev_fatal:TOTAL_ERR_FATAL"; do
+
+            attr="${spec%%:*}"
+            total_key="${spec#*:}"
+
+            [[ -r "$sys_dir/$attr" ]] || continue
+
+            total_value="$(
+                awk -v key="$total_key" \
+                    '$1 == key {print $2}' \
+                    "$sys_dir/$attr"
+            )"
+
+            [[ -n "$total_value" ]] || total_value="N/A"
+
+            case "$attr" in
+                aer_dev_correctable)
+                    cor="$total_value"
+                    ;;
+                aer_dev_nonfatal)
+                    nonfatal="$total_value"
+                    ;;
+                aer_dev_fatal)
+                    fatal="$total_value"
+                    ;;
+            esac
+        done
+
+        printf \
+            'AER counters: COR=%s NONFATAL=%s FATAL=%s\n' \
+            "$cor" "$nonfatal" "$fatal"
+
+        # Show nonzero per-error counters, if any.
+        for attr in \
+            aer_dev_correctable \
+            aer_dev_nonfatal \
+            aer_dev_fatal; do
+
+            [[ -r "$sys_dir/$attr" ]] || continue
+
+            nonzero="$(
+                awk '
+                    $NF ~ /^[0-9]+$/ &&
+                    ($NF + 0) > 0 &&
+                    $1 !~ /^TOTAL_/ {
+                        print "  " $1 "=" $NF
+                    }
+                ' "$sys_dir/$attr"
+            )"
+
+            if [[ -n "$nonzero" ]]; then
+                echo "Nonzero $attr:"
+                printf '%s\n' "$nonzero"
+            fi
+        done
+
+        # AER root-port counters, when available.
+        for attr in \
+            aer_rootport_total_err_cor \
+            aer_rootport_total_err_nonfatal \
+            aer_rootport_total_err_fatal; do
+
+            if [[ -r "$sys_dir/$attr" ]]; then
+                printf '%s: %s\n' \
+                    "$attr" "$(<"$sys_dir/$attr")"
+            fi
+        done
+    done
+
+    echo
+    echo "Note: DevSta flags may be sticky from earlier events."
+}
+
 set -euo pipefail
 
 GPU_ID="10de:2c05"
@@ -32,54 +205,67 @@ find_pci_device() {
     printf '%s' "$found"
 }
 
+# Read-only validation. This does NOT prove all kernel UVM references are gone.
+# Never treats /dev/nvidia-uvm as eGPU-specific: it is shared with the 5090.
 require_no_compute_processes() {
-    [[ "$(driver_of "$GPU")" == "nvidia" ]] || return
+    [[ "$(driver_of "$GPU")" == "nvidia" ]] ||
+        die "eGPU is not bound to NVIDIA; cannot run NVIDIA preflight."
 
-    command -v nvidia-smi >/dev/null 2>&1 ||
-        die "nvidia-smi not found; refusing to unbind NVIDIA."
+    command -v nvidia-smi >/dev/null 2>&1 || die "nvidia-smi missing."
+    command -v fuser >/dev/null 2>&1 || die "fuser missing (package: psmisc)."
 
-    local uuid processes
+    local info minor uuid processes result rc
+    info="/proc/driver/nvidia/gpus/$GPU/information"
+    [[ -r "$info" ]] || die "Missing NVIDIA GPU information: $info"
+    minor="$(awk -F: '/^Device Minor:/ {gsub(/[[:space:]]/, "", $2); print $2}' "$info")"
+    [[ "$minor" =~ ^[0-9]+$ ]] || die "Could not resolve NVIDIA minor for $GPU."
+    [[ -c "/dev/nvidia$minor" ]] || die "Missing /dev/nvidia$minor."
 
-    uuid="$(
-        nvidia-smi \
-            --query-gpu=pci.bus_id,uuid \
-            --format=csv,noheader,nounits |
-        awk -F', *' -v pci="$GPU" '
-            BEGIN {
-                sub(/^[^:]*:/, "", pci)
-                pci = tolower(pci)
-            }
-            {
-                bus = $1
-                sub(/^[^:]*:/, "", bus)
-                bus = tolower(bus)
-        
-                if (bus == pci) {
-                    print $2
-                    exit
-                }
-            }
-        '
-    )"
+    # Prevent a stalled NVML query from hanging the transition indefinitely.
+    local gpu_list
+    gpu_list="$(timeout --kill-after=2s 10s nvidia-smi \
+        --query-gpu=pci.bus_id,uuid \
+        --format=csv,noheader,nounits)" || die "NVIDIA GPU query failed/timed out."
+    uuid="$(printf '%s\n' "$gpu_list" | awk -F', *' -v pci="$GPU" '
+        BEGIN {sub(/^[^:]*:/, "", pci); pci=tolower(pci)}
+        {bus=$1; sub(/^[^:]*:/, "", bus); if (tolower(bus)==pci) {print $2; exit}}')"
+    [[ -n "$uuid" ]] || die "Could not resolve NVIDIA UUID for $GPU."
 
-    [[ -n "$uuid" ]] ||
-        die "Could not determine NVIDIA UUID for GPU $GPU."
+    local compute_list
+    compute_list="$(timeout --kill-after=2s 10s nvidia-smi \
+        --query-compute-apps=gpu_uuid,pid,process_name \
+        --format=csv,noheader,nounits)" || die "Compute query failed/timed out."
+    processes="$(printf '%s\n' "$compute_list" | awk -F', *' -v uuid="$uuid" '
+        $1 == uuid {printf "PID %-8s %s\n", $2, $3}')"
+    [[ -z "$processes" ]] || die "Active eGPU compute processes:
+$processes"
 
-    processes="$(
-        nvidia-smi \
-            --query-compute-apps=gpu_uuid,pid,process_name \
-            --format=csv,noheader,nounits 2>/dev/null |
-        awk -F', *' -v uuid="$uuid" '
-            $1 == uuid {
-                printf "PID %-8s %s\n", $2, $3
-            }
-        '
-    )"
-
-    if [[ -n "$processes" ]]; then
-        printf >&2 "Active compute processes on the eGPU:\n%s\n" "$processes"
-        die "Refusing to unbind the eGPU while CUDA/compute is active."
+    # NVIDIA minor is GPU-specific; nvidiactl and nvidia-uvm are shared.
+    # fuser return: 0 = in use, 1 = no users (or error; verify via stderr).
+    local fuser_out
+    rc=0
+    fuser_out="$(sudo timeout --kill-after=2s 10s fuser -v "/dev/nvidia$minor" 2>&1)" || rc=$?
+    if ((rc == 0)); then
+        die "eGPU device node is still in use:
+$fuser_out"
+    elif ((rc != 1)); then
+        die "fuser check failed (exit $rc): $fuser_out"
+    elif [[ "$fuser_out" == *"Cannot"* || "$fuser_out" == *"Permission denied"* ]]; then
+        die "fuser diagnostic error: $fuser_out"
     fi
+
+    echo "NVIDIA preflight passed for $GPU (/dev/nvidia$minor)."
+    echo "NOTE: shared UVM references and new GPU opens cannot be fully excluded."
+}
+
+preflight() {
+    local s
+    s="$(state)"
+    case "$s" in
+        linux) require_vm_stopped; require_no_compute_processes ;;
+        off|off-ready|vfio) echo "eGPU state: $s; NVIDIA detach is not applicable." ;;
+        *) die "Inconsistent eGPU state; refusing preflight." ;;
+    esac
 }
 
 detect_devices() {
@@ -187,16 +373,23 @@ die() {
 
 VM="win11-vrchat"
 
-vm_running() {
-    command -v virsh >/dev/null 2>&1 || return 1
+vm_state() {
+    command -v virsh >/dev/null 2>&1 || die "virsh not installed; VM state unknown."
+    local current
+    current="$(timeout --kill-after=2s 8s virsh -c qemu:///system domstate "$VM")" ||
+        die "Cannot determine VM state; refusing transition."
+    printf '%s\n' "$current"
+}
 
-    [[ "$(virsh -c qemu:///system domstate "$VM" 2>/dev/null || true)" == "running" ]]
+vm_running() {
+    [[ "$(vm_state)" == "running" ]]
 }
 
 require_vm_stopped() {
-    if vm_running; then
-        die "VM '$VM' is running. Shut it down before changing the eGPU state."
-    fi
+    local current
+    current="$(vm_state)"
+    [[ "$current" == "shut off" ]] ||
+        die "VM '$VM' is '$current' (expected 'shut off'); refusing transition."
 }
 
 OPENLINKHUB_WAS_ACTIVE=0
@@ -300,13 +493,9 @@ show_status() {
     auth="$(usb4_authorized)"
 
     local vm_state
-    
-    if vm_running; then
-        vm_state="running"
-    else
-        vm_state="stopped"
-    fi
-    
+
+    vm_state="$(vm_state)"
+
     printf "State:        %s\n" "$s"
     printf "VM:           %s\n" "$vm_state"
     printf "GPU:          %s\n" "$gpu"
@@ -328,6 +517,16 @@ show_status() {
 to_linux() {
     local s
     s="$(state)"
+
+    local egpu_link_mode="${EGPU_LINK_MODE:-gen3}"
+    case "$egpu_link_mode" in
+        gen3|native) ;;
+        *) die "Unknown EGPU_LINK_MODE: $egpu_link_mode (expected gen3 or native)." ;;
+    esac
+
+    if [[ "$s" == "linux" && "$egpu_link_mode" == "native" ]]; then
+        die "Already NVIDIA-bound. Native mode requires a fresh VFIO -> NVIDIA transition; do not modify the live link."
+    fi
 
     case "$s" in
         linux)
@@ -352,19 +551,167 @@ to_linux() {
     echo "Resetting GPU under VFIO..."
     echo flr | sudo tee "$GPU_SYS/reset_method" >/dev/null
     echo 1   | sudo tee "$GPU_SYS/reset" >/dev/null
-    
+
+    if [[ "$egpu_link_mode" == "gen3" ]]; then
+    # --- EGPU GEN3: AFTER FLR / BEFORE NVIDIA BIND ---
+    local gen3_bridge gen3_raw gen3_value
+    local gen3_speed gen3_width gen3_training gen3_dllla
+    local gen3_stable=0 gen3_i gen3_dev
+
+    gen3_bridge="$(
+        basename "$(dirname "$(readlink -f "$GPU_SYS")")"
+    )"
+
+    lspci -Dn -s "$gen3_bridge" | grep -qi '8086:5786' ||
+        die "EGPU Gen3: unexpected parent bridge $gen3_bridge"
+
+    lspci -Dn -s "$GPU" | grep -qi '10de:2c05' ||
+        die "EGPU Gen3: unexpected GPU $GPU"
+
+    echo "=== EGPU GEN3: AFTER FLR ==="
+
+    for gen3_dev in "$gen3_bridge" "$GPU"; do
+        echo "$gen3_dev:"
+        sudo lspci -vv -s "$gen3_dev" |
+            grep -E 'LnkSta:|LnkCtl2:' || true
+    done
+
+    echo "=== EGPU GEN3: CONFIGURE LINK ==="
+
+    sudo setpci -s "$gen3_bridge" CAP_EXP+30.w=0023:002f
+    sudo setpci -s "$GPU" CAP_EXP+30.w=0023:002f
+
+    sudo setpci -s "$gen3_bridge" CAP_EXP+10.w=0020:0020
+
+    echo "=== EGPU GEN3: WAIT FOR STABLE LINK ==="
+
+    for ((gen3_i = 0; gen3_i < 60; gen3_i++)); do
+        gen3_raw="$(
+            sudo setpci -s "$gen3_bridge" CAP_EXP+12.w
+        )"
+
+        gen3_value=$((16#$gen3_raw))
+        gen3_speed=$((gen3_value & 15))
+        gen3_width=$(((gen3_value >> 4) & 63))
+        gen3_training=$(((gen3_value >> 11) & 1))
+        gen3_dllla=$(((gen3_value >> 13) & 1))
+
+        if ((gen3_speed == 3 &&
+             gen3_width == 4 &&
+             gen3_training == 0 &&
+             gen3_dllla == 1)); then
+            gen3_stable=$((gen3_stable + 1))
+        else
+            gen3_stable=0
+        fi
+
+        if ((gen3_stable >= 5)); then
+            break
+        fi
+
+        sleep 0.1
+    done
+
+    if ((gen3_stable < 5)); then
+        die "Gen3 link did not stabilize; GPU remains under VFIO."
+    fi
+
+    sleep 2
+
+    echo "Stable Gen3 x4 before NVIDIA binding."
+
+    sudo lspci -vv -s "$gen3_bridge" |
+        grep -E 'LnkSta:|LnkCtl2:'
+    # --- EGPU GEN3: PRE-BIND COMPLETE ---
+    else
+        # Native mode: no PCIe link configuration writes.
+        local native_bridge native_dev
+        native_bridge="$(basename "$(dirname "$(readlink -f "$GPU_SYS")")")"
+
+        lspci -Dn -s "$native_bridge" | grep -qi '8086:5786' ||
+            die "Native mode: unexpected parent bridge $native_bridge"
+
+        lspci -Dn -s "$GPU" | grep -qi '10de:2c05' ||
+            die "Native mode: unexpected GPU $GPU"
+
+        echo "=== EGPU NATIVE LINK: BEFORE NVIDIA BINDING (READ ONLY) ==="
+
+        for native_dev in "$native_bridge" "$GPU"; do
+            echo "$native_dev:"
+            sudo lspci -vv -s "$native_dev" |
+                grep -E 'LnkSta:|LnkCtl2:' || true
+        done
+    fi
+
+
     echo "Unbinding GPU from VFIO..."
     echo "$GPU" | sudo tee "$VFIO_DRIVER/unbind" >/dev/null
-    
+
     echo "Binding GPU to NVIDIA..."
     echo nvidia | sudo tee "$GPU_SYS/driver_override" >/dev/null
-    
+
     if ! echo "$GPU" | sudo tee "$NVIDIA_DRIVER/bind" >/dev/null; then
         die "NVIDIA bind failed. GPU has been left in its current state; inspect with: egpu status"
     fi
 
     [[ "$(driver_of "$GPU")" == "nvidia" ]] ||
         die "GPU did not enter NVIDIA state."
+
+    if [[ "$egpu_link_mode" == "gen3" ]]; then
+    echo "=== EGPU GEN3: AFTER NVIDIA BINDING ==="
+
+    for gen3_dev in "$gen3_bridge" "$GPU"; do
+        echo "$gen3_dev:"
+        sudo lspci -vv -s "$gen3_dev" |
+            grep -E 'LnkSta:|LnkCtl2:' || true
+    done
+
+    # Read-only verification. Never retrain a live NVIDIA GPU.
+    local gen3_ctl2_raw gen3_ctl2_value
+    local gen3_target gen3_hasd
+
+    for gen3_dev in "$gen3_bridge" "$GPU"; do
+        gen3_raw="$(
+            sudo setpci -s "$gen3_dev" CAP_EXP+12.w
+        )"
+
+        gen3_value=$((16#$gen3_raw))
+        gen3_speed=$((gen3_value & 15))
+        gen3_width=$(((gen3_value >> 4) & 63))
+        gen3_training=$(((gen3_value >> 11) & 1))
+
+        gen3_ctl2_raw="$(
+            sudo setpci -s "$gen3_dev" CAP_EXP+30.w
+        )"
+
+        gen3_ctl2_value=$((16#$gen3_ctl2_raw))
+        gen3_target=$((gen3_ctl2_value & 15))
+        gen3_hasd=$(((gen3_ctl2_value >> 5) & 1))
+
+        if (( gen3_speed < 1 ||
+              gen3_speed > 3 ||
+              gen3_width != 4 ||
+              gen3_training != 0 ||
+              gen3_target != 3 ||
+              gen3_hasd != 1 )); then
+
+            die "EGPU Gen3 verification failed at $gen3_dev: speed Gen$gen3_speed, width x$gen3_width, target Gen$gen3_target, HASD=$gen3_hasd. GPU remains bound to NVIDIA. Do NOT retrain live."
+        fi
+    done
+
+    echo "EGPU PCIe capped at Gen3 x4 after NVIDIA binding (current Gen${gen3_speed} x${gen3_width})."
+    else
+        echo "=== EGPU NATIVE LINK: AFTER NVIDIA BINDING (READ ONLY) ==="
+
+        for native_dev in "$native_bridge" "$GPU"; do
+            echo "$native_dev:"
+            sudo lspci -vv -s "$native_dev" |
+                grep -E 'LnkSta:|LnkCtl2:' || true
+        done
+
+        echo "Native mode: no manual PCIe link target, SpeedDis or retrain writes."
+    fi
+
 
     echo
     echo "eGPU is ready for Linux CUDA."
@@ -393,42 +740,46 @@ to_vfio() {
     esac
 
     require_vm_stopped
+    # Verify before and after stopping services. EXIT trap restores service on failure.
     require_no_compute_processes
     stop_openlinkhub
+    trap 'restore_openlinkhub' EXIT
+    require_no_compute_processes
 
     local rc=0
-    
+
     echo "Unbinding GPU from NVIDIA..."
     echo "$GPU" | sudo tee "$NVIDIA_DRIVER/unbind" >/dev/null || rc=$?
-    
+
     if (( rc == 0 )) && [[ "$(driver_of "$GPU")" != "unbound" ]]; then
         echo "ERROR: NVIDIA unbind did not complete." >&2
         rc=1
     fi
-    
+
     if (( rc == 0 )); then
         echo "Binding GPU to VFIO..."
         echo vfio-pci | sudo tee "$GPU_SYS/driver_override" >/dev/null || rc=$?
     fi
-    
+
     if (( rc == 0 )); then
         echo "$GPU" | sudo tee "$VFIO_DRIVER/bind" >/dev/null || rc=$?
     fi
-    
+
     if (( rc == 0 )) && [[ "$(driver_of "$GPU")" != "vfio-pci" ]]; then
         echo "ERROR: GPU did not enter VFIO state." >&2
         rc=1
     fi
-    
+
     if (( rc == 0 )) && [[ "$(driver_of "$AUDIO")" != "vfio-pci" ]]; then
         echo "ERROR: Audio function is not bound to VFIO." >&2
         rc=1
     fi
-    
+
     restore_openlinkhub
-    
+    trap - EXIT
+
     (( rc == 0 )) || die "Failed to transition eGPU from NVIDIA to VFIO."
-    
+
     echo
     echo "eGPU is ready for Windows/VFIO."
 }
@@ -464,10 +815,10 @@ wait_for_pcie_suspend() {
     local gpu_real
     local gpu_parent
     local egpu_root
-    
+
     gpu_real="$(readlink -f "$GPU_SYS")" ||
         die "Could not resolve GPU sysfs path."
-    
+
     [[ -n "$gpu_real" && -d "$gpu_real" ]] ||
         die "Resolved GPU sysfs path is invalid."
 
@@ -599,14 +950,14 @@ to_off() {
     local i
     for ((i = 0; i < 50; i++)); do
         detect_devices
-    
+
         if [[ -z "$GPU" && -z "$AUDIO" ]]; then
             break
         fi
-    
+
         sleep 0.1
     done
-    
+
     if [[ -n "$GPU" || -n "$AUDIO" ]]; then
         die "GPU/audio still present 5 seconds after USB4 deauthorization. Do NOT power off the eGPU."
     fi
@@ -624,10 +975,14 @@ to_windows() {
     local s
     s="$(state)"
 
-    if vm_running; then
+    local current_vm_state
+    current_vm_state="$(vm_state)"
+    if [[ "$current_vm_state" == "running" ]]; then
         echo "Windows VM '$VM' is already running."
         return
     fi
+    [[ "$current_vm_state" == "shut off" ]] ||
+        die "VM '$VM' is '$current_vm_state'; refusing Windows start."
 
     case "$s" in
         linux|vfio)
@@ -655,16 +1010,15 @@ to_windows() {
 
     virsh -c qemu:///system start "$VM"
 
-    if ! vm_running; then
+    [[ "$(vm_state)" == "running" ]] ||
         die "VM start returned, but '$VM' is not running."
-    fi
 
     echo
     echo "Windows VM is running with the eGPU."
 }
 
 usage() {
-    echo "Usage: egpu {status|linux|vfio|windows|off}"
+    echo "Usage: egpu {status|preflight|linux|vfio|windows|off}"
 }
 
 detect_devices
@@ -674,6 +1028,10 @@ detect_usb4
 case "${1:-}" in
     status)
         show_status
+        egpu_pcie_aer_status
+        ;;
+    preflight)
+        preflight
         ;;
     linux)
         to_linux
