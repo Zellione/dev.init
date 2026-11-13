@@ -10,6 +10,11 @@ Singleton {
     // CPU / RAM
     property int cpuUsage: 0
     property int memoryUsage: 0
+    property real memoryUsed: 0
+    property real memoryTotal: 0
+    readonly property string memoryText:
+        memoryUsed.toFixed(1) + "/"
+        + memoryTotal.toFixed(1) + "G"
     property int cpuTemperature: -1
 
     // NVIDIA
@@ -50,6 +55,8 @@ Singleton {
 
                     hardware.cpuUsage = data.cpu;
                     hardware.memoryUsage = data.memory;
+                    hardware.memoryUsed = data.memoryUsed ?? 0;
+                    hardware.memoryTotal = data.memoryTotal ?? 0;
                     hardware.cpuTemperature =
                         data.temperature ?? -1;
 

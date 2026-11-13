@@ -43,6 +43,26 @@ hl.monitor({
     vrr      = 0,
 })
 
+-- Workspace-to-monitor mapping
+-- DP-3: AOC AGON Pro (primary)
+-- DP-2: Acer (secondary)
+
+for _, id in ipairs({1, 2, 3, 4, 7, 8, 9, 10}) do
+    hl.workspace_rule({
+        workspace = tostring(id),
+        monitor = "DP-3",
+        default = (id == 1),
+    })
+end
+
+for _, id in ipairs({5, 6}) do
+    hl.workspace_rule({
+        workspace = tostring(id),
+        monitor = "DP-2",
+        default = (id == 6),
+    })
+end
+
 ---------------------
 ---- MY PROGRAMS ----
 ---------------------
@@ -316,21 +336,10 @@ hl.on("window.active", function(w)
     hl.config({
         cursor = {
             inactive_timeout = timeout,
+            no_break_fs_vrr = 1,
         },
     })
 end)
-
-hl.workspace_rule({
-    workspace = "1",
-    monitor = "DP-3",
-    default = true,
-})
-
-hl.workspace_rule({
-    workspace = "2",
-    monitor = "DP-2",
-    default = true,
-})
 
 -- Layer rules also return a handle.
 -- local overlayLayerRule = hl.layer_rule({
@@ -349,6 +358,17 @@ hl.window_rule({
     float = true,
 })
 
+-- KDE / XDG Portal file dialogs
+hl.window_rule({
+    name = "kde-file-dialog",
+    match = {
+        class = "^org\\.freedesktop\\.impl\\.portal\\.desktop\\.kde$",
+    },
+    float = true,
+    size = { 1200, 800 },
+    center = true,
+})
+
 hl.window_rule({
     name = "heroic-no-idle-inhibit",
     match = {
@@ -363,6 +383,29 @@ hl.window_rule({
     },
     no_vrr = true,
 })
+
+
+hl.window_rule({
+    match = {
+        class = "brave-browser",
+    },
+    no_vrr = true,
+})
+
+
+hl.window_rule({
+    match = {
+        class = "firefox",
+    },
+    no_vrr = true,
+})
+
+-- hl.window_rule({
+--     match = {
+--         class = "mpv",
+--     },
+--     no_vrr = true,
+-- })
 
 -- hl.window_rule({
 --     name = "steamvr-room-setup",
@@ -400,6 +443,7 @@ hl.window_rule({
     match = { title = "^Wallpaper Picker$" },
     float = true,
     center = true,
+    stay_focused = true,
 })
 
 hl.window_rule({
@@ -407,6 +451,7 @@ hl.window_rule({
     match = { title = "^App Launcher$" },
     float = true,
     center = true,
+    stay_focused = true,
 })
 
 hl.window_rule({
@@ -414,6 +459,7 @@ hl.window_rule({
     match = { title = "^Clipboard Picker$" },
     float = true,
     center = true,
+    stay_focused = true,
 })
 
 hl.window_rule({
@@ -421,4 +467,33 @@ hl.window_rule({
     match = { title = "^Notification History$" },
     float = true,
     center = true,
+    stay_focused = true,
+})
+
+-- Initial application workspace assignments.
+-- Rules only apply when windows are created.
+-- Existing windows can still be moved freely.
+
+hl.window_rule({
+    name = "steam-workspace",
+    match = {
+        class = "^steam$",
+    },
+    workspace = "3 silent",
+})
+
+hl.window_rule({
+    name = "vesktop-workspace",
+    match = {
+        class = "^vesktop$",
+    },
+    workspace = "5 silent",
+})
+
+hl.window_rule({
+    name = "firefox-workspace",
+    match = {
+        class = "^firefox$",
+    },
+    workspace = "6 silent",
 })

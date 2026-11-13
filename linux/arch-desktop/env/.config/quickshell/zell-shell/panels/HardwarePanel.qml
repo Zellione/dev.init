@@ -60,7 +60,7 @@ Item {
             MetricCard {
                 Layout.fillWidth: true
                 title: "RAM Usage"
-                value: Hardware.memoryUsage + "%"
+                value: Hardware.memoryText
                 percentage: Hardware.memoryUsage
                 accent: Theme.cyan
             }
@@ -331,7 +331,7 @@ Item {
                             label: "TEMPERATURE",
                             value: Hardware.egpuNvidiaAvailable
                                 && Hardware.egpu.gpu.temperature !== null
-                                ? Hardware.egpu.gpu.temperature + "°C"
+                                ? Math.round(Hardware.egpu.gpu.temperature) + "°C"
                                 : "N/A"
                         },
                         {

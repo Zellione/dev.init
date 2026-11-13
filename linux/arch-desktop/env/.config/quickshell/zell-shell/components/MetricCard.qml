@@ -10,6 +10,8 @@ Rectangle {
     property string value: ""
     property real percentage: 0
 
+    property int valueFontSize: Theme.fontLarge
+
     property color accent: Theme.cyan
     property color cardBackground: "#19303c"
     property color trackColor: "#30424b"
@@ -33,11 +35,19 @@ Rectangle {
         }
 
         Text {
+            Layout.fillWidth: true
+
             text: root.value
             color: root.accent
+
             font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontLarge
+            font.pixelSize: root.valueFontSize
             font.bold: true
+
+            fontSizeMode: Text.Fit
+
+            elide: Text.ElideRight
+            maximumLineCount: 1
         }
 
         MetricBar {

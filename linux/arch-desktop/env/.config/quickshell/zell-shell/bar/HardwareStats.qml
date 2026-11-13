@@ -30,7 +30,7 @@ Rectangle {
         }
 
         Text {
-            text: "RAM " + Hardware.memoryUsage + "%"
+            text: "RAM " + Hardware.memoryText
             color: Hardware.memoryUsage >= 90
                 ? Theme.danger
                 : Hardware.memoryUsage >= 75

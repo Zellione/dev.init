@@ -43,6 +43,26 @@ def memory_usage():
     return round(100 * (total - available) / total)
 
 
+
+def memory_amounts():
+    """Return used and total system memory in GiB."""
+    values = {}
+
+    with open("/proc/meminfo", encoding="utf-8") as f:
+        for line in f:
+            key, value = line.split(":", 1)
+            if key in ("MemTotal", "MemAvailable"):
+                values[key] = int(value.strip().split()[0])
+
+    total = values["MemTotal"]
+    used = total - values["MemAvailable"]
+
+    return {
+        "memoryUsed": round(used / 1048576, 2),
+        "memoryTotal": round(total / 1048576, 2),
+    }
+
+
 def cpu_temperature():
     paths = glob.glob(
         "/sys/devices/pci0000:00/"
@@ -159,7 +179,7 @@ def nvidia_gpu_stats():
                 "pci": pci,
                 "name": name,
                 "usage": numeric(util, int),
-                "temperature": numeric(temp, int),
+                "temperature": numeric(temp, float),
                 "memoryUsed": (
                     round(used_mib / 1024, 1)
                     if used_mib is not None else None
@@ -218,6 +238,7 @@ if __name__ == "__main__":
     print(json.dumps({
         "cpu": cpu_usage(),
         "memory": memory_usage(),
+        **memory_amounts(),
         "temperature": cpu_temperature(),
         "gpu": internal_gpu,
         "egpu": external_gpu,
